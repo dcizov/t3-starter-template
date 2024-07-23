@@ -1,13 +1,10 @@
 import Link from "next/link";
 import { PanelsTopLeft } from "lucide-react";
-import { ArrowRightIcon } from "@radix-ui/react-icons";
-import { Button } from "@/app/_components/ui/button";
-import { ModeToggle } from "@/app/_components/mode-toggle";
-import { getServerAuthSession } from "@/server/auth";
+import { ModeToggle } from "@/app/_components/common/mode-toggle";
 import { HydrateClient } from "@/trpc/server";
+import AuthButtons from "./_components/auth/auth-buttons";
 
-export default async function Home() {
-  const session = await getServerAuthSession();
+export default function Home() {
   const year = new Date().getFullYear();
 
   return (
@@ -25,6 +22,7 @@ export default async function Home() {
             </Link>
             <nav className="ml-auto flex items-center gap-2">
               <ModeToggle />
+              <AuthButtons />
             </nav>
           </div>
         </header>
@@ -40,21 +38,6 @@ export default async function Home() {
                 aliquyam erat, sed diam voluptua. At vero eos et accusam et
                 justo duo dolores et ea.
               </span>
-              <div className="flex w-full items-center justify-center space-x-4 py-4 md:pb-6">
-                <Button variant="default" asChild>
-                  <Link
-                    href={session ? "/api/auth/signout" : "/api/auth/signin"}
-                  >
-                    {session ? "Sign out" : "Sign in"}
-                    <ArrowRightIcon className="ml-2" />
-                  </Link>
-                </Button>
-                <Button variant="outline" asChild>
-                  <Link href={session ? "/dashboard" : "/api/auth/signup"}>
-                    {session ? "Dashboard" : "Sign up"}
-                  </Link>
-                </Button>
-              </div>
             </section>
           </div>
         </main>
