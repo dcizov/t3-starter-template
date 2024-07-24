@@ -11,7 +11,7 @@ interface AuthButtonsProps {
 
 const AuthButtons: React.FC<AuthButtonsProps> = ({ session }) => {
   return (
-    <div className="flex justify-end gap-4">
+    <div className="flex justify-end gap-2">
       {session && session.user ? (
         <UserNav />
       ) : (
