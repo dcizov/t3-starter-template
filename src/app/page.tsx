@@ -3,9 +3,11 @@ import { PanelsTopLeft } from "lucide-react";
 import { ModeToggle } from "@/app/_components/common/mode-toggle";
 import { HydrateClient } from "@/trpc/server";
 import AuthButtons from "./_components/auth/auth-buttons";
+import { getServerAuthSession } from "@/server/auth";
 
-export default function Home() {
+export default async function Home() {
   const year = new Date().getFullYear();
+  const session = await getServerAuthSession();
 
   return (
     <HydrateClient>
@@ -22,7 +24,7 @@ export default function Home() {
             </Link>
             <nav className="ml-auto flex items-center gap-2">
               <ModeToggle />
-              <AuthButtons />
+              <AuthButtons session={session} />
             </nav>
           </div>
         </header>

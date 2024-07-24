@@ -1,13 +1,15 @@
 "use client";
 
 import Link from "next/link";
-import { useSession } from "next-auth/react";
-
 import { Button } from "@/app/_components/ui/button";
 import { UserNav } from "@/app/_components/common/user-nav";
+import type { Session } from "next-auth";
 
-export default function AuthButtons() {
-  const { data: session } = useSession();
+interface AuthButtonsProps {
+  session: Session | null;
+}
+
+const AuthButtons: React.FC<AuthButtonsProps> = ({ session }) => {
   return (
     <div className="flex justify-end gap-4">
       {session && session.user ? (
@@ -24,4 +26,6 @@ export default function AuthButtons() {
       )}
     </div>
   );
-}
+};
+
+export default AuthButtons;
