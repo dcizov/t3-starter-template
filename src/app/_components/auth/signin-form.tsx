@@ -51,8 +51,8 @@ export default function SignInForm() {
       });
 
       if (!response?.ok) {
-        toast.error("Something went wrong!", {
-          description: response?.error,
+        toast.error("Login failed", {
+          description: response?.error ?? "Invalid credentials",
         });
         return;
       }
@@ -60,7 +60,10 @@ export default function SignInForm() {
       toast.success("Welcome back!", {
         description: "Redirecting you to your dashboard!",
       });
-      router.push("/");
+
+      setTimeout(() => {
+        router.push("/");
+      }, 500);
     },
     onError: (error) => {
       if (error.data?.zodError) {

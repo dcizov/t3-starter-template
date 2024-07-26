@@ -44,7 +44,7 @@ export default function SignUpForm() {
     resolver: zodResolver(registerSchema),
   });
 
-  const { mutateAsync } = api.auth.register.useMutation({
+  const { mutateAsync } = api.auth.login.useMutation({
     onSuccess: async () => {
       const response = await signIn("credentials", {
         redirect: false,
@@ -53,8 +53,8 @@ export default function SignUpForm() {
       });
 
       if (!response?.ok) {
-        toast.error("Something went wrong!", {
-          description: response?.error,
+        toast.error("Login failed", {
+          description: response?.error ?? "Invalid credentials",
         });
         return;
       }
@@ -62,7 +62,10 @@ export default function SignUpForm() {
       toast.success("Welcome back!", {
         description: "Redirecting you to your dashboard!",
       });
-      router.push("/");
+
+      setTimeout(() => {
+        router.push("/");
+      }, 500);
     },
     onError: (error) => {
       if (error.data?.zodError) {
