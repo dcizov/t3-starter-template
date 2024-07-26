@@ -62,7 +62,7 @@ export default function SignInForm() {
       });
 
       setTimeout(() => {
-        router.push("/");
+        router.push("/dashboard");
       }, 500);
     },
     onError: (error) => {

@@ -13,7 +13,7 @@ export default function GoogleSigninButton({ typeSubmit }: Props) {
 
   const handleGoogleSignIn = async () => {
     setIsLoading(true);
-    await signIn("google", { callbackUrl: "/", redirect: true });
+    await signIn("google", { callbackUrl: "/dashboard", redirect: true });
   };
 
   return (
