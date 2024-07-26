@@ -2,7 +2,7 @@ import Link from "next/link";
 import { PanelsTopLeft } from "lucide-react";
 import { ModeToggle } from "@/app/_components/common/mode-toggle";
 import { HydrateClient } from "@/trpc/server";
-import AuthButtons from "./_components/auth/auth-buttons";
+import AuthButtons from "./_components/auth/auth-group-buttons";
 import { getServerAuthSession } from "@/server/auth";
 
 export default async function Home() {
