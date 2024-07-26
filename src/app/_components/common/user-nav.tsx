@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-empty-function */
 "use client";
 
 import Link from "next/link";
@@ -25,11 +24,14 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/app/_components/ui/dropdown-menu";
-import { signOut, useSession } from "next-auth/react";
+import { signOut } from "next-auth/react";
+import type { Session } from "next-auth";
 
-export function UserNav() {
-  const { data: session } = useSession();
+interface UserNavProps {
+  session: Session | null;
+}
 
+export const UserNav: React.FC<UserNavProps> = ({ session }) => {
   return (
     <DropdownMenu>
       <TooltipProvider disableHoverableContent>
@@ -98,4 +100,6 @@ export function UserNav() {
       </DropdownMenuContent>
     </DropdownMenu>
   );
-}
+};
+
+export default UserNav;
