@@ -13,14 +13,14 @@ const AuthButtons: React.FC<AuthButtonsProps> = ({ session }) => {
   return (
     <div className="flex justify-end gap-2">
       {session && session.user ? (
-        <UserNav />
+        <UserNav session={session} />
       ) : (
         <>
           <Button variant="outline" size="sm" asChild>
-            <Link href="/login">Sign in</Link>
+            <Link href="/signin">Sign in</Link>
           </Button>
           <Button variant="default" size="sm" asChild>
-            <Link href="/register">Sign up</Link>
+            <Link href="/signup">Sign up</Link>
           </Button>
         </>
       )}
