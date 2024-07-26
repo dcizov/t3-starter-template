@@ -3,11 +3,11 @@ import { PanelsTopLeft } from "lucide-react";
 import { ModeToggle } from "@/app/_components/common/mode-toggle";
 import { HydrateClient } from "@/trpc/server";
 import AuthButtons from "./_components/auth/auth-group-buttons";
-import { getServerAuthSession } from "@/server/auth";
+import { auth } from "@/server/auth";
 
 export default async function Home() {
   const year = new Date().getFullYear();
-  const session = await getServerAuthSession();
+  const session = await auth();
 
   return (
     <HydrateClient>
