@@ -10,10 +10,13 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/app/_components/ui/breadcrumb";
+import { auth } from "@/server/auth";
 
-export default function DashboardPage() {
+export default async function DashboardPage() {
+  const session = await auth();
+
   return (
-    <ContentLayout title="Dashboard">
+    <ContentLayout title="Dashboard" session={session}>
       <Breadcrumb>
         <BreadcrumbList>
           <BreadcrumbItem>

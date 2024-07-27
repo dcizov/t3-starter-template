@@ -1,12 +1,14 @@
 import { ModeToggle } from "../common/mode-toggle";
-import { UserNav } from "./user-nav";
+import { UserNav } from "@/app/_components/common/user-nav";
 import { SheetMenu } from "./sheet-menu";
+import type { Session } from "next-auth";
 
 interface NavbarProps {
   title: string;
+  session: Session | null;
 }
 
-export function Navbar({ title }: NavbarProps) {
+export function Navbar({ title, session }: NavbarProps) {
   return (
     <header className="sticky top-0 z-10 w-full bg-background/95 shadow backdrop-blur supports-[backdrop-filter]:bg-background/60 dark:shadow-secondary">
       <div className="mx-4 flex h-14 items-center sm:mx-8">
@@ -16,7 +18,7 @@ export function Navbar({ title }: NavbarProps) {
         </div>
         <div className="flex flex-1 items-center justify-end space-x-2">
           <ModeToggle />
-          <UserNav />
+          <UserNav session={session} />
         </div>
       </div>
     </header>
