@@ -44,7 +44,7 @@ export default function SignUpForm() {
     resolver: zodResolver(registerSchema),
   });
 
-  const { mutateAsync } = api.auth.login.useMutation({
+  const { mutateAsync } = api.auth.register.useMutation({
     onSuccess: async () => {
       const response = await signIn("credentials", {
         redirect: false,
