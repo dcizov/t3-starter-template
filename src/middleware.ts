@@ -1,6 +1,5 @@
 import type { NextRequest } from "next/server";
 import { type Session } from "next-auth";
-import { NextResponse } from "next/server";
 import {
   DEFAULT_LOGIN_REDIRECT,
   apiAuthPrefix,
@@ -11,15 +10,12 @@ import {
 export async function middleware(req: NextRequest) {
   const { nextUrl } = req;
 
-  const resSession: Response = await fetch(
-    `${process.env.AUTH_URL}/api/auth/session`,
-    {
-      method: "GET",
-      headers: {
-        cookie: req.headers.get("cookie") ?? "",
-      },
+  const resSession = await fetch(`${process.env.AUTH_URL}/api/auth/session`, {
+    method: "GET",
+    headers: {
+      cookie: req.headers.get("cookie") ?? "",
     },
-  );
+  });
 
   let session: Session | null = null;
   try {
@@ -35,14 +31,14 @@ export async function middleware(req: NextRequest) {
   const isAuthRoute = authRoutes.includes(nextUrl.pathname);
 
   if (isApiAuthRoute) {
-    return NextResponse.next();
+    return null;
   }
 
   if (isAuthRoute) {
     if (isAuthorized) {
-      return NextResponse.redirect(new URL(DEFAULT_LOGIN_REDIRECT, nextUrl));
+      return Response.redirect(new URL(DEFAULT_LOGIN_REDIRECT, nextUrl));
     }
-    return NextResponse.next();
+    return null;
   }
 
   if (!isAuthorized && !isPublicRoute) {
@@ -51,12 +47,12 @@ export async function middleware(req: NextRequest) {
       callbackUrl += nextUrl.search;
     }
     const encodedCallbackUrl = encodeURIComponent(callbackUrl);
-    return NextResponse.redirect(
+    return Response.redirect(
       new URL(`/signin?callbackUrl=${encodedCallbackUrl}`, nextUrl),
     );
   }
 
-  return NextResponse.next();
+  return null;
 }
 
 export const config = {
