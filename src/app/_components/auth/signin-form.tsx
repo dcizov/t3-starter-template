@@ -61,9 +61,7 @@ export default function SignInForm() {
         description: "Redirecting you to your dashboard!",
       });
 
-      setTimeout(() => {
-        router.push("/dashboard");
-      }, 500);
+      router.push("/dashboard");
     },
     onError: (error) => {
       if (error.data?.zodError) {
