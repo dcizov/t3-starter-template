@@ -59,7 +59,7 @@ export default function SignUpForm() {
         return;
       }
 
-      toast.success("Welcome back!", {
+      toast.success("Account Created!", {
         description: "Redirecting you to your dashboard!",
       });
 
