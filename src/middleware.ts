@@ -3,6 +3,7 @@ import { type Session } from "next-auth";
 import {
   DEFAULT_LOGIN_REDIRECT,
   apiAuthPrefix,
+  trpcPrefix,
   authRoutes,
   publicRoutes,
 } from "@/lib/routes";
@@ -27,10 +28,11 @@ export async function middleware(req: NextRequest) {
   const isAuthorized = session?.user?.id != null;
 
   const isApiAuthRoute = nextUrl.pathname.startsWith(apiAuthPrefix);
+  const isTrpcRoute = nextUrl.pathname.startsWith(trpcPrefix);
   const isPublicRoute = publicRoutes.includes(nextUrl.pathname);
   const isAuthRoute = authRoutes.includes(nextUrl.pathname);
 
-  if (isApiAuthRoute) {
+  if (isApiAuthRoute || isTrpcRoute) {
     return null;
   }
 
