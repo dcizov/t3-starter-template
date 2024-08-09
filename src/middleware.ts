@@ -1,4 +1,4 @@
-import type { NextRequest } from "next/server";
+import { NextResponse, type NextRequest } from "next/server";
 import { type Session } from "next-auth";
 import {
   DEFAULT_LOGIN_REDIRECT,
@@ -11,7 +11,12 @@ import {
 export async function middleware(req: NextRequest) {
   const { nextUrl } = req;
 
-  const resSession = await fetch(`${process.env.AUTH_URL}/api/auth/session`, {
+  const AUTH_URL = process.env.AUTH_URL;
+  if (!AUTH_URL) {
+    throw new Error("AUTH_URL is not defined in the environment variables");
+  }
+
+  const resSession = await fetch(`${AUTH_URL}/api/auth/session`, {
     method: "GET",
     headers: {
       cookie: req.headers.get("cookie") ?? "",
@@ -23,6 +28,7 @@ export async function middleware(req: NextRequest) {
     session = (await resSession.json()) as Session;
   } catch (error) {
     console.error("Failed to parse session:", error);
+    return new NextResponse("Internal Server Error", { status: 500 });
   }
 
   const isAuthorized = session?.user?.id != null;
@@ -33,28 +39,25 @@ export async function middleware(req: NextRequest) {
   const isAuthRoute = authRoutes.includes(nextUrl.pathname);
 
   if (isApiAuthRoute || isTrpcRoute) {
-    return null;
+    return NextResponse.next();
   }
 
   if (isAuthRoute) {
     if (isAuthorized) {
-      return Response.redirect(new URL(DEFAULT_LOGIN_REDIRECT, nextUrl));
+      return NextResponse.redirect(new URL(DEFAULT_LOGIN_REDIRECT, nextUrl));
     }
-    return null;
+    return NextResponse.next();
   }
 
   if (!isAuthorized && !isPublicRoute) {
-    let callbackUrl = nextUrl.pathname;
-    if (nextUrl.search) {
-      callbackUrl += nextUrl.search;
-    }
+    const callbackUrl = nextUrl.pathname + nextUrl.search;
     const encodedCallbackUrl = encodeURIComponent(callbackUrl);
-    return Response.redirect(
+    return NextResponse.redirect(
       new URL(`/signin?callbackUrl=${encodedCallbackUrl}`, nextUrl),
     );
   }
 
-  return null;
+  return NextResponse.next();
 }
 
 export const config = {
