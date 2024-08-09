@@ -82,7 +82,7 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
 
           const cks = cookies();
           cks.set({
-            name: "next-auth.session-token",
+            name: "authjs.session-token",
             value: sessionToken,
             expires: sessionExpiry,
           });
@@ -146,20 +146,20 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
     maxAge: 60 * 60 * 24 * 30,
     encode: async ({ token, secret, maxAge }) => {
       const cks = cookies();
-      const cookie = cks?.get("next-auth.session-token");
+      const cookie = cks?.get("authjs.session-token");
       if (cookie) return cookie.value;
       return encode({
         token,
         secret,
         maxAge,
-        salt: "next-auth.session-token",
+        salt: "authjs.session-token",
       });
     },
     decode: async ({ token, secret }) => {
       return decode({
         token,
         secret,
-        salt: "next-auth.session-token",
+        salt: "authjs.session-token",
       });
     },
   },
