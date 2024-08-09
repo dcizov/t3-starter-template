@@ -29,14 +29,10 @@ declare module "next-auth" {
   }
 }
 
-// Session utilities
-const generateSessionToken = () => {
-  return randomUUID();
-};
+const generateSessionToken = () => randomUUID();
 
-const fromDate = (time: number, date = Date.now()) => {
-  return new Date(date + time * 1000);
-};
+const fromDate = (time: number, date = Date.now()) =>
+  new Date(date + time * 1000);
 
 /**
  * Options for NextAuth.js used to configure adapters, providers, callbacks, etc.
@@ -45,22 +41,13 @@ const fromDate = (time: number, date = Date.now()) => {
  */
 export const { auth, handlers, signIn, signOut } = NextAuth({
   callbacks: {
-    session: async ({ session, user }) => {
-      if (!user?.id) {
-        console.error(
-          "User object is missing or does not have a id property",
-          user,
-        );
-        return session;
-      }
-      return {
-        ...session,
-        user: {
-          ...session.user,
-          id: user.id,
-        },
-      };
-    },
+    session: async ({ session, user }) => ({
+      ...session,
+      user: {
+        ...session.user,
+        id: user.id,
+      },
+    }),
     signIn: async ({ user, account }) => {
       if (account?.provider === "credentials") {
         if (!user.id) {
@@ -80,11 +67,14 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
 
           if (!createdSession) return false;
 
-          const cks = cookies();
-          cks.set({
+          const cookieStore = cookies();
+          cookieStore.set({
             name: "authjs.session-token",
             value: sessionToken,
             expires: sessionExpiry,
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: "lax",
           });
 
           return true;
@@ -145,8 +135,8 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
   jwt: {
     maxAge: 60 * 60 * 24 * 30,
     encode: async ({ token, secret, maxAge }) => {
-      const cks = cookies();
-      const cookie = cks?.get("authjs.session-token");
+      const cookieStore = cookies();
+      const cookie = cookieStore.get("authjs.session-token");
       if (cookie) return cookie.value;
       return encode({
         token,
