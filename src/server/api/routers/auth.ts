@@ -8,7 +8,7 @@ export const authRouter = createTRPCRouter({
   register: publicProcedure
     .input(registerSchema)
     .mutation(async ({ ctx, input }) => {
-      const { name, email, password } = input;
+      const { firstName, lastName, email, password } = input;
 
       const existingUser = await ctx.db.query.users.findFirst({
         where: (users, { eq }) => eq(users.email, email),
@@ -23,10 +23,14 @@ export const authRouter = createTRPCRouter({
 
       const hashedPassword = await hash(password, 10);
 
+      const fullName = `${firstName} ${lastName}`;
+
       const newUser = await ctx.db
         .insert(users)
         .values({
-          name,
+          firstName,
+          lastName,
+          name: fullName,
           email,
           password: hashedPassword,
         })
@@ -78,6 +82,8 @@ export const authRouter = createTRPCRouter({
       message: "Login successful",
       user: {
         id: user.id,
+        firstName: user.firstName,
+        lastName: user.lastName,
         name: user.name,
         email: user.email,
       },

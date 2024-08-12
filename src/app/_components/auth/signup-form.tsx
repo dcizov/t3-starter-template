@@ -36,7 +36,8 @@ export default function SignUpForm() {
 
   const form = useForm<InputType>({
     defaultValues: {
-      name: "",
+      firstName: "",
+      lastName: "",
       email: "",
       password: "",
       confirmPassword: "",
@@ -122,12 +123,27 @@ export default function SignUpForm() {
               <div className="space-y-2">
                 <FormField
                   control={form.control}
-                  name="name"
+                  name="firstName"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Name</FormLabel>
+                      <FormLabel>First name</FormLabel>
                       <FormControl>
-                        <Input placeholder="John Doe" type="text" {...field} />
+                        <Input placeholder="John" type="text" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              <div className="space-y-2">
+                <FormField
+                  control={form.control}
+                  name="lastName"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Last name</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Doe" type="text" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
