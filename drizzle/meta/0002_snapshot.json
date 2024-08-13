@@ -4,8 +4,8 @@
   "version": "6",
   "dialect": "postgresql",
   "tables": {
-    "public.t3-fullstack-template_account": {
-      "name": "t3-fullstack-template_account",
+    "public.t3-starter-template_account": {
+      "name": "t3-starter-template_account",
       "schema": "",
       "columns": {
         "user_id": {
@@ -83,10 +83,10 @@
         }
       },
       "foreignKeys": {
-        "t3-fullstack-template_account_user_id_t3-fullstack-template_user_id_fk": {
-          "name": "t3-fullstack-template_account_user_id_t3-fullstack-template_user_id_fk",
-          "tableFrom": "t3-fullstack-template_account",
-          "tableTo": "t3-fullstack-template_user",
+        "t3-starter-template_account_user_id_t3-starter-template_user_id_fk": {
+          "name": "t3-starter-template_account_user_id_t3-starter-template_user_id_fk",
+          "tableFrom": "t3-starter-template_account",
+          "tableTo": "t3-starter-template_user",
           "columnsFrom": ["user_id"],
           "columnsTo": ["id"],
           "onDelete": "no action",
@@ -94,15 +94,15 @@
         }
       },
       "compositePrimaryKeys": {
-        "t3-fullstack-template_account_provider_provider_account_id_pk": {
-          "name": "t3-fullstack-template_account_provider_provider_account_id_pk",
+        "t3-starter-template_account_provider_provider_account_id_pk": {
+          "name": "t3-starter-template_account_provider_provider_account_id_pk",
           "columns": ["provider", "provider_account_id"]
         }
       },
       "uniqueConstraints": {}
     },
-    "public.t3-fullstack-template_session": {
-      "name": "t3-fullstack-template_session",
+    "public.t3-starter-template_session": {
+      "name": "t3-starter-template_session",
       "schema": "",
       "columns": {
         "session_token": {
@@ -132,10 +132,10 @@
         }
       },
       "foreignKeys": {
-        "t3-fullstack-template_session_user_id_t3-fullstack-template_user_id_fk": {
-          "name": "t3-fullstack-template_session_user_id_t3-fullstack-template_user_id_fk",
-          "tableFrom": "t3-fullstack-template_session",
-          "tableTo": "t3-fullstack-template_user",
+        "t3-starter-template_session_user_id_t3-starter-template_user_id_fk": {
+          "name": "t3-starter-template_session_user_id_t3-starter-template_user_id_fk",
+          "tableFrom": "t3-starter-template_session",
+          "tableTo": "t3-starter-template_user",
           "columnsFrom": ["user_id"],
           "columnsTo": ["id"],
           "onDelete": "no action",
@@ -145,8 +145,8 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "public.t3-fullstack-template_user": {
-      "name": "t3-fullstack-template_user",
+    "public.t3-starter-template_user": {
+      "name": "t3-starter-template_user",
       "schema": "",
       "columns": {
         "id": {
@@ -204,8 +204,8 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "public.t3-fullstack-template_verification_token": {
-      "name": "t3-fullstack-template_verification_token",
+    "public.t3-starter-template_verification_token": {
+      "name": "t3-starter-template_verification_token",
       "schema": "",
       "columns": {
         "identifier": {
@@ -230,8 +230,8 @@
       "indexes": {},
       "foreignKeys": {},
       "compositePrimaryKeys": {
-        "t3-fullstack-template_verification_token_identifier_token_pk": {
-          "name": "t3-fullstack-template_verification_token_identifier_token_pk",
+        "t3-starter-template_verification_token_identifier_token_pk": {
+          "name": "t3-starter-template_verification_token_identifier_token_pk",
           "columns": ["identifier", "token"]
         }
       },

@@ -17,7 +17,7 @@ import { type AdapterAccount } from "next-auth/adapters";
  * @see https://orm.drizzle.team/docs/goodies#multi-project-schema
  */
 export const createTable = pgTableCreator(
-  (name) => `t3-fullstack-template_${name}`,
+  (name) => `t3-starter-template_${name}`,
 );
 
 export const users = createTable("user", {

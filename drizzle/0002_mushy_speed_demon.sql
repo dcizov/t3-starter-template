@@ -1,1 +1,1 @@
-DROP TABLE "t3-fullstack-template_post";
+DROP TABLE "t3-starter-template_post";

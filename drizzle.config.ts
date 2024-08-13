@@ -8,5 +8,5 @@ export default {
   dbCredentials: {
     url: env.AUTH_DRIZZLE_URL,
   },
-  tablesFilter: ["t3-fullstack-template_*"],
+  tablesFilter: ["t3-starter-template_*"],
 } satisfies Config;
