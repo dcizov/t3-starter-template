@@ -1,0 +1,1 @@
+DROP TABLE "t3-fullstack-template_post";

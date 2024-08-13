@@ -24,6 +24,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/app/_components/ui/dropdown-menu";
+import LetteredAvatar from "@/app/_components/common/lettered-avatar";
 import { signOut } from "next-auth/react";
 import type { Session } from "next-auth";
 
@@ -47,7 +48,9 @@ export const UserNav: React.FC<UserNavProps> = ({ session }) => {
                     <AvatarImage src={session?.user.image} alt="Avatar" />
                   ) : (
                     <AvatarFallback className="bg-transparent">
-                      JD
+                      <LetteredAvatar
+                        name={session?.user.name ?? "Default User"}
+                      />
                     </AvatarFallback>
                   )}
                 </Avatar>
