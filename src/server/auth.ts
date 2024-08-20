@@ -16,6 +16,7 @@ import { cookies } from "next/headers";
 import { randomUUID } from "crypto";
 import { fromDate, getUserRole } from "@/lib/utils";
 import { encode, decode } from "next-auth/jwt";
+import { eq } from "drizzle-orm";
 
 /**
  * Module augmentation for `next-auth` types. Allows us to add custom properties to the `session`
@@ -32,6 +33,7 @@ declare module "next-auth" {
   }
 
   interface User {
+    id?: string;
     role: string;
   }
 }
@@ -157,6 +159,21 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
       },
     }),
   ],
+  events: {
+    linkAccount: async ({ user }) => {
+      if (!user.id) {
+        console.error("User ID is undefined");
+        return;
+      }
+
+      await db
+        .update(users)
+        .set({
+          emailVerified: new Date(),
+        })
+        .where(eq(users.id, user.id));
+    },
+  },
   pages: {
     signIn: "/signin",
     signOut: "/",
