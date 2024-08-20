@@ -1,0 +1,1 @@
+ALTER TABLE "t3-starter-template_user" ADD COLUMN "role" varchar(255);

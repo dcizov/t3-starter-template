@@ -1,7 +1,7 @@
 import { DrizzleAdapter } from "@auth/drizzle-adapter";
 import NextAuth, { type DefaultSession } from "next-auth";
 import { type Adapter } from "next-auth/adapters";
-import Google from "next-auth/providers/google";
+import Google, { type GoogleProfile } from "next-auth/providers/google";
 import Credentials from "next-auth/providers/credentials";
 import { compareSync } from "bcrypt";
 import { db } from "@/server/db";
@@ -25,7 +25,12 @@ declare module "next-auth" {
   interface Session extends DefaultSession {
     user: {
       id: string;
+      role: string;
     } & DefaultSession["user"];
+  }
+
+  interface User {
+    role: string;
   }
 }
 
@@ -33,6 +38,14 @@ const generateSessionToken = () => randomUUID();
 
 const fromDate = (time: number, date = Date.now()) =>
   new Date(date + time * 1000);
+
+const getUserRole = (email: string) => {
+  if (email === process.env.ADMIN_USER_EMAIL) {
+    return "admin";
+  } else {
+    return "user";
+  }
+};
 
 /**
  * Options for NextAuth.js used to configure adapters, providers, callbacks, etc.
@@ -46,6 +59,7 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
       user: {
         ...session.user,
         id: user.id,
+        role: user.role,
       },
     }),
     signIn: async ({ user, account }) => {
@@ -94,7 +108,19 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
     verificationTokensTable: verificationTokens,
   }) as Adapter,
   providers: [
-    Google,
+    Google({
+      profile(profile: GoogleProfile & { role?: string }) {
+        return {
+          id: profile.sub,
+          email: profile.email,
+          firstName: profile.given_name,
+          lastName: profile.family_name,
+          name: profile.name,
+          image: profile.picture,
+          role: getUserRole(profile.email),
+        };
+      },
+    }),
     Credentials({
       credentials: {
         email: { label: "Email", type: "text" },
@@ -123,6 +149,7 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
           firstName: user.firstName,
           lastName: user.lastName,
           name: user.name,
+          role: user.role,
         };
       },
     }),

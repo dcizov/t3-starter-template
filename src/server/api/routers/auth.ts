@@ -25,6 +25,8 @@ export const authRouter = createTRPCRouter({
 
       const fullName = `${firstName} ${lastName}`;
 
+      const role = email === process.env.ADMIN_USER_EMAIL ? "admin" : "user";
+
       const newUser = await ctx.db
         .insert(users)
         .values({
@@ -33,6 +35,7 @@ export const authRouter = createTRPCRouter({
           name: fullName,
           email,
           password: hashedPassword,
+          role,
         })
         .returning();
 
@@ -44,7 +47,11 @@ export const authRouter = createTRPCRouter({
           providerAccountId: newUser[0].id,
         });
 
-        return { success: true, message: "User registered successfully" };
+        return {
+          success: true,
+          message: "User registered successfully",
+          role: newUser[0].role,
+        };
       } else {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",

@@ -22,6 +22,34 @@
       "when": 1723538647649,
       "tag": "0002_mushy_speed_demon",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1724156043162,
+      "tag": "0003_orange_deathstrike",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "6",
+      "when": 1724156203476,
+      "tag": "0004_slimy_tyrannus",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "6",
+      "when": 1724165665258,
+      "tag": "0005_concerned_lord_tyger",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "6",
+      "when": 1724166398171,
+      "tag": "0006_naive_carnage",
+      "breakpoints": true
     }
   ]
 }
