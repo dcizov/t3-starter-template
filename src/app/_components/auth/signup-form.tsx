@@ -20,6 +20,7 @@ import {
   FormMessage,
 } from "@/app/_components/ui/form";
 import GoogleSigninButton from "@/app/_components/auth/google-auth-button";
+import GithubAuthButton from "@/app/_components/auth/github-auth-button";
 import AuthSubmitButton from "@/app/_components/auth/auth-button";
 import { Toaster } from "@/app/_components/ui/sonner";
 import { toast } from "sonner";
@@ -214,6 +215,9 @@ export default function SignUpForm() {
               </div>
               <div className="space-y-2">
                 <GoogleSigninButton typeSubmit="signup" />
+              </div>
+              <div className="space-y-2">
+                <GithubAuthButton typeSubmit="signup" />
               </div>
             </div>
             <div className="text-center text-sm">

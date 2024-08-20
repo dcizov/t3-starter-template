@@ -21,6 +21,7 @@ import {
 } from "@/app/_components/ui/form";
 import { signIn } from "next-auth/react";
 import GoogleSigninButton from "@/app/_components/auth/google-auth-button";
+import GithubAuthButton from "@/app/_components/auth/github-auth-button";
 import AuthSubmitButton from "@/app/_components/auth/auth-button";
 import { Toaster } from "@/app/_components/ui/sonner";
 import { toast } from "sonner";
@@ -169,6 +170,9 @@ export default function SignInForm() {
                 </div>
                 <div className="space-y-2">
                   <GoogleSigninButton typeSubmit="signin" />
+                </div>
+                <div className="space-y-2">
+                  <GithubAuthButton typeSubmit="signin" />
                 </div>
               </div>
             </div>

@@ -2,6 +2,7 @@ import { DrizzleAdapter } from "@auth/drizzle-adapter";
 import NextAuth, { type DefaultSession } from "next-auth";
 import { type Adapter } from "next-auth/adapters";
 import Google, { type GoogleProfile } from "next-auth/providers/google";
+import Github, { type GitHubProfile } from "next-auth/providers/github";
 import Credentials from "next-auth/providers/credentials";
 import { compareSync } from "bcrypt";
 import { db } from "@/server/db";
@@ -96,6 +97,20 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
     verificationTokensTable: verificationTokens,
   }) as Adapter,
   providers: [
+    Github({
+      profile(profile: GitHubProfile & { role?: string }) {
+        const [firstName, lastName] = (profile.name ?? "").split(" ");
+        return {
+          id: profile.id.toString(),
+          email: profile.email,
+          firstName: firstName ?? "",
+          lastName: lastName ?? "",
+          name: profile.name ?? profile.login,
+          image: profile.avatar_url,
+          role: getUserRole(profile.email ?? ""),
+        };
+      },
+    }),
     Google({
       profile(profile: GoogleProfile & { role?: string }) {
         return {
