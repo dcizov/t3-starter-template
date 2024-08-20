@@ -2,6 +2,7 @@ import { createTRPCRouter, publicProcedure } from "@/server/api/trpc";
 import { users, accounts } from "@/server/db/schema";
 import { TRPCError } from "@trpc/server";
 import { hash, compare } from "bcrypt";
+import { getUserRole } from "@/lib/utils";
 import { registerSchema, loginSchema } from "@/common/validation/auth";
 
 export const authRouter = createTRPCRouter({
@@ -25,8 +26,6 @@ export const authRouter = createTRPCRouter({
 
       const fullName = `${firstName} ${lastName}`;
 
-      const role = email === process.env.ADMIN_USER_EMAIL ? "admin" : "user";
-
       const newUser = await ctx.db
         .insert(users)
         .values({
@@ -35,7 +34,7 @@ export const authRouter = createTRPCRouter({
           name: fullName,
           email,
           password: hashedPassword,
-          role,
+          role: getUserRole(email),
         })
         .returning();
 
