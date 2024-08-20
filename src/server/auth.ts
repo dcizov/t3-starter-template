@@ -13,6 +13,7 @@ import {
 } from "@/server/db/schema";
 import { cookies } from "next/headers";
 import { randomUUID } from "crypto";
+import { fromDate, getUserRole } from "@/lib/utils";
 import { encode, decode } from "next-auth/jwt";
 
 /**
@@ -33,19 +34,6 @@ declare module "next-auth" {
     role: string;
   }
 }
-
-const generateSessionToken = () => randomUUID();
-
-const fromDate = (time: number, date = Date.now()) =>
-  new Date(date + time * 1000);
-
-const getUserRole = (email: string) => {
-  if (email === process.env.ADMIN_USER_EMAIL) {
-    return "admin";
-  } else {
-    return "user";
-  }
-};
 
 /**
  * Options for NextAuth.js used to configure adapters, providers, callbacks, etc.
@@ -69,7 +57,7 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
           return false;
         }
 
-        const sessionToken = generateSessionToken();
+        const sessionToken = randomUUID();
         const sessionExpiry = fromDate(30 * 24 * 60 * 60);
 
         try {
