@@ -20,9 +20,9 @@ import {
   FormMessage,
 } from "@/app/_components/ui/form";
 import { signIn } from "next-auth/react";
+import AuthButton from "@/app/_components/auth/auth-button";
 import GoogleAuthButton from "@/app/_components/auth/google-auth-button";
 import GithubAuthButton from "@/app/_components/auth/github-auth-button";
-import AuthSubmitButton from "@/app/_components/auth/auth-button";
 import { Toaster } from "@/app/_components/ui/sonner";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
@@ -166,7 +166,7 @@ export default function SignInForm() {
               </div>
               <div className="space-y-4">
                 <div className="space-y-2">
-                  <AuthSubmitButton isLoading={isLoading} typeSubmit="signin" />
+                  <AuthButton isLoading={isLoading} typeSubmit="signin" />
                 </div>
                 <div className="space-y-2">
                   <GoogleAuthButton typeSubmit="signin" />

@@ -6,7 +6,7 @@ interface Props {
   typeSubmit: "signin" | "signup";
 }
 
-export default function AuthSubmitButton({ isLoading, typeSubmit }: Props) {
+export default function AuthButton({ isLoading, typeSubmit }: Props) {
   return (
     <Button type="submit" className="w-full" disabled={isLoading}>
       {isLoading && (
