@@ -27,7 +27,6 @@ import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { api } from "@/trpc/react";
 import { registerSchema } from "@/common/validation/auth";
-import { signIn } from "next-auth/react";
 
 type InputType = z.infer<typeof registerSchema>;
 
@@ -48,24 +47,11 @@ export default function SignUpForm() {
 
   const { mutateAsync } = api.auth.register.useMutation({
     onSuccess: async () => {
-      const response = await signIn("credentials", {
-        redirect: false,
-        email: form.getValues("email"),
-        password: form.getValues("password"),
+      toast.success("Account Created", {
+        description: "Please sign in with your new account.",
       });
 
-      if (!response?.ok) {
-        toast.error("Login failed", {
-          description: response?.error ?? "Invalid credentials",
-        });
-        return;
-      }
-
-      toast.success("Account Created!", {
-        description: "Redirecting you to your dashboard!",
-      });
-
-      router.push("/dashboard");
+      router.push("/signin");
     },
     onError: (error) => {
       if (error.data?.zodError) {
