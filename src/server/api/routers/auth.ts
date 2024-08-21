@@ -3,7 +3,7 @@ import { users, accounts } from "@/server/db/schema";
 import { TRPCError } from "@trpc/server";
 import { hash, compare } from "bcrypt";
 import { getUserRole } from "@/lib/utils";
-import { registerSchema, loginSchema } from "@/common/validation/auth";
+import { registerSchema, loginSchema } from "@/schemas/auth";
 
 export const authRouter = createTRPCRouter({
   register: publicProcedure

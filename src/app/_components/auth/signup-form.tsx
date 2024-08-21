@@ -25,7 +25,7 @@ import { Toaster } from "@/app/_components/ui/sonner";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { api } from "@/trpc/react";
-import { registerSchema } from "@/common/validation/auth";
+import { registerSchema } from "@/schemas/auth";
 
 type InputType = z.infer<typeof registerSchema>;
 
