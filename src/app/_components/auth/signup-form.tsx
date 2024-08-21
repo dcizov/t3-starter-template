@@ -20,8 +20,7 @@ import {
   FormMessage,
 } from "@/app/_components/ui/form";
 import AuthButton from "@/app/_components/auth/auth-button";
-import GoogleAuthButton from "@/app/_components/auth/google-auth-button";
-import GithubAuthButton from "@/app/_components/auth/github-auth-button";
+import SocialAuthButton from "@/app/_components/auth/social-auth-button";
 import { Toaster } from "@/app/_components/ui/sonner";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
@@ -200,10 +199,10 @@ export default function SignUpForm() {
                 <AuthButton isLoading={isLoading} typeSubmit="signup" />
               </div>
               <div className="space-y-2">
-                <GoogleAuthButton typeSubmit="signup" />
+                <SocialAuthButton typeSubmit="signin" provider="google" />
               </div>
               <div className="space-y-2">
-                <GithubAuthButton typeSubmit="signup" />
+                <SocialAuthButton typeSubmit="signin" provider="github" />
               </div>
             </div>
             <div className="text-center text-sm">

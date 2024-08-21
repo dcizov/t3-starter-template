@@ -21,8 +21,7 @@ import {
 } from "@/app/_components/ui/form";
 import { signIn } from "next-auth/react";
 import AuthButton from "@/app/_components/auth/auth-button";
-import GoogleAuthButton from "@/app/_components/auth/google-auth-button";
-import GithubAuthButton from "@/app/_components/auth/github-auth-button";
+import SocialAuthButton from "@/app/_components/auth/social-auth-button"; // Import the new SocialAuthButton component
 import { Toaster } from "@/app/_components/ui/sonner";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
@@ -169,10 +168,10 @@ export default function SignInForm() {
                   <AuthButton isLoading={isLoading} typeSubmit="signin" />
                 </div>
                 <div className="space-y-2">
-                  <GoogleAuthButton typeSubmit="signin" />
+                  <SocialAuthButton typeSubmit="signin" provider="google" />
                 </div>
                 <div className="space-y-2">
-                  <GithubAuthButton typeSubmit="signin" />
+                  <SocialAuthButton typeSubmit="signin" provider="github" />
                 </div>
               </div>
             </div>

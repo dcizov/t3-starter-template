@@ -2,22 +2,32 @@ import { useState } from "react";
 import { signIn } from "next-auth/react";
 import { Button } from "@/app/_components/ui/button";
 import { LoaderCircle } from "lucide-react";
-import { SiGoogle } from "@icons-pack/react-simple-icons";
+import { SiGithub, SiGoogle } from "@icons-pack/react-simple-icons";
 import { DEFAULT_LOGIN_REDIRECT } from "@/lib/routes";
 
 interface Props {
   typeSubmit: "signin" | "signup";
+  provider: "github" | "google";
 }
 
-export default function GoogleAuthButton({ typeSubmit }: Props) {
-  const [isLoading, setIsLoading] = useState(false);
+const providerIcons = {
+  github: SiGithub,
+  google: SiGoogle,
+};
 
-  const handleGoogleSignIn = async () => {
+const providerLabels = {
+  github: "Github",
+  google: "Google",
+};
+
+export default function SocialAuthButton({ typeSubmit, provider }: Props) {
+  const [isLoading, setIsLoading] = useState(false);
+  const Icon = providerIcons[provider];
+  const label = providerLabels[provider];
+
+  const handleSignIn = async () => {
     setIsLoading(true);
-    await signIn("google", {
-      callbackUrl: DEFAULT_LOGIN_REDIRECT,
-      redirect: true,
-    });
+    await signIn(provider, { callbackUrl: DEFAULT_LOGIN_REDIRECT });
   };
 
   return (
@@ -26,16 +36,18 @@ export default function GoogleAuthButton({ typeSubmit }: Props) {
       type="button"
       disabled={isLoading}
       className="flex w-full items-center justify-center gap-2"
-      onClick={handleGoogleSignIn}
+      onClick={handleSignIn}
     >
       {isLoading ? (
         <span className="animate-spin">
           <LoaderCircle size={16} />
         </span>
       ) : (
-        <SiGoogle size={16} />
+        <Icon size={16} />
       )}{" "}
-      {typeSubmit === "signup" ? "Sign Up with Google" : "Sign in with Google"}
+      {typeSubmit === "signup"
+        ? `Sign Up with ${label}`
+        : `Sign in with ${label}`}
     </Button>
   );
 }
