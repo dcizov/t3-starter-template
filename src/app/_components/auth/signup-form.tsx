@@ -19,7 +19,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/app/_components/ui/form";
-import GoogleSigninButton from "@/app/_components/auth/google-auth-button";
+import GoogleAuthButton from "@/app/_components/auth/google-auth-button";
 import GithubAuthButton from "@/app/_components/auth/github-auth-button";
 import AuthSubmitButton from "@/app/_components/auth/auth-button";
 import { Toaster } from "@/app/_components/ui/sonner";
@@ -200,7 +200,7 @@ export default function SignUpForm() {
                 <AuthSubmitButton isLoading={isLoading} typeSubmit="signup" />
               </div>
               <div className="space-y-2">
-                <GoogleSigninButton typeSubmit="signup" />
+                <GoogleAuthButton typeSubmit="signup" />
               </div>
               <div className="space-y-2">
                 <GithubAuthButton typeSubmit="signup" />

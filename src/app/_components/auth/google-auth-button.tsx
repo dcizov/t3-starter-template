@@ -3,17 +3,21 @@ import { signIn } from "next-auth/react";
 import { Button } from "@/app/_components/ui/button";
 import { LoaderCircle } from "lucide-react";
 import { SiGoogle } from "@icons-pack/react-simple-icons";
+import { DEFAULT_LOGIN_REDIRECT } from "@/lib/routes";
 
 interface Props {
   typeSubmit: "signin" | "signup";
 }
 
-export default function GoogleSigninButton({ typeSubmit }: Props) {
+export default function GoogleAuthButton({ typeSubmit }: Props) {
   const [isLoading, setIsLoading] = useState(false);
 
   const handleGoogleSignIn = async () => {
     setIsLoading(true);
-    await signIn("google", { callbackUrl: "/dashboard", redirect: true });
+    await signIn("google", {
+      callbackUrl: DEFAULT_LOGIN_REDIRECT,
+      redirect: true,
+    });
   };
 
   return (
