@@ -67,6 +67,7 @@ export const updateUserSchema = z.object({
     )
     .optional(),
   role: z.string().min(2, "Role must have at least 2 characters").optional(),
+  emailVerified: z.date().optional(),
 });
 
 // Delete User Schema

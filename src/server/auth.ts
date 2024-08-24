@@ -16,7 +16,7 @@ import { cookies } from "next/headers";
 import { randomUUID } from "crypto";
 import { fromDate, getUserRole } from "@/lib/utils";
 import { encode, decode } from "next-auth/jwt";
-import { eq } from "drizzle-orm";
+import { getUserByEmail, updateUser } from "@/lib/caller";
 
 /**
  * Module augmentation for `next-auth` types. Allows us to add custom properties to the `session`
@@ -35,6 +35,7 @@ declare module "next-auth" {
   interface User {
     id?: string;
     role: string;
+    emailVerified?: Date;
   }
 }
 
@@ -45,23 +46,20 @@ declare module "next-auth" {
  */
 export const { auth, handlers, signIn, signOut } = NextAuth({
   callbacks: {
-    session: async ({ session, user }) => ({
-      ...session,
-      user: {
-        ...session.user,
-        id: user.id,
-        role: user.role,
-      },
-    }),
-    signIn: async ({ user, account }) => {
-      if (account?.provider === "credentials") {
-        if (!user.id) {
-          console.error("User ID is undefined");
-          return false;
-        }
-
+    async session({ session, user }) {
+      return {
+        ...session,
+        user: {
+          ...session.user,
+          id: user.id,
+          role: user.role,
+        },
+      };
+    },
+    async signIn({ user, account }) {
+      if (account?.provider === "credentials" && user.id) {
         const sessionToken = randomUUID();
-        const sessionExpiry = fromDate(30 * 24 * 60 * 60);
+        const sessionExpiry = fromDate(60 * 60 * 24 * 30); // 30 days
 
         try {
           const createdSession = await db.insert(sessions).values({
@@ -134,28 +132,32 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
       authorize: async (credentials) => {
         if (!credentials?.email || !credentials.password) return null;
 
-        const user = await db.query.users.findFirst({
-          where: (users, { eq }) =>
-            eq(users.email, credentials.email as string),
-        });
+        try {
+          const user = await getUserByEmail({
+            email: credentials.email as string,
+          });
 
-        if (!user?.password) return null;
+          if (!user?.password) return null;
 
-        const isPasswordValid = compareSync(
-          credentials.password as string,
-          user.password,
-        );
+          const isPasswordValid = compareSync(
+            credentials.password as string,
+            user.password,
+          );
 
-        if (!isPasswordValid) return null;
+          if (!isPasswordValid) return null;
 
-        return {
-          id: user.id,
-          email: user.email,
-          firstName: user.firstName,
-          lastName: user.lastName,
-          name: user.name,
-          role: user.role,
-        };
+          return {
+            id: user.id,
+            email: user.email,
+            firstName: user.firstName,
+            lastName: user.lastName,
+            name: user.name,
+            role: user.role,
+          };
+        } catch (error) {
+          console.error("Error authorizing credentials:", error);
+          return null;
+        }
       },
     }),
   ],
@@ -166,12 +168,14 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
         return;
       }
 
-      await db
-        .update(users)
-        .set({
+      try {
+        await updateUser({
+          id: user.id,
           emailVerified: new Date(),
-        })
-        .where(eq(users.id, user.id));
+        });
+      } catch (error) {
+        console.error("Error linking account:", error);
+      }
     },
   },
   pages: {
