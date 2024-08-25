@@ -16,7 +16,7 @@ import { cookies } from "next/headers";
 import { randomUUID } from "crypto";
 import { fromDate, getUserRole } from "@/lib/utils";
 import { encode, decode } from "next-auth/jwt";
-import { getUserByEmail, updateUser } from "@/lib/caller";
+import { getUserByEmail, updateUser } from "@/lib/user-utils";
 
 /**
  * Module augmentation for `next-auth` types. Allows us to add custom properties to the `session`
@@ -59,7 +59,7 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
     async signIn({ user, account }) {
       if (account?.provider === "credentials" && user.id) {
         const sessionToken = randomUUID();
-        const sessionExpiry = fromDate(60 * 60 * 24 * 30); // 30 days
+        const sessionExpiry = fromDate(60 * 60 * 24 * 30);
 
         try {
           const createdSession = await db.insert(sessions).values({
@@ -98,7 +98,7 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
   }) as Adapter,
   providers: [
     Github({
-      profile(profile: GitHubProfile & { role?: string }) {
+      profile(profile: GitHubProfile) {
         const [firstName, lastName] = (profile.name ?? "").split(" ");
         return {
           id: profile.id.toString(),
@@ -112,7 +112,7 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
       },
     }),
     Google({
-      profile(profile: GoogleProfile & { role?: string }) {
+      profile(profile: GoogleProfile) {
         return {
           id: profile.sub,
           email: profile.email,

@@ -54,6 +54,7 @@ export const updateUserSchema = z.object({
     .min(2, "Last name must have at least 2 characters")
     .max(12, "Last name must be up to 12 characters")
     .optional(),
+  name: z.string().optional(),
   email: z.string().email("Please enter a valid email address").optional(),
   password: z
     .string()
