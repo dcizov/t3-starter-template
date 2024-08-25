@@ -1,9 +1,16 @@
+import { randomUUID } from "crypto";
+import { cookies } from "next/headers";
+import { sessions } from "@/server/db/schema";
 import { createTRPCRouter, publicProcedure } from "@/server/api/trpc";
 import { users, accounts } from "@/server/db/schema";
 import { TRPCError } from "@trpc/server";
 import { hash, compare } from "bcrypt";
-import { getUserRole } from "@/lib/utils";
-import { registerSchema, loginSchema } from "@/schemas/auth";
+import { fromDate, getUserRole } from "@/lib/utils";
+import {
+  registerSchema,
+  loginSchema,
+  createSessionSchema,
+} from "@/schemas/auth";
 
 export const authRouter = createTRPCRouter({
   register: publicProcedure
@@ -95,4 +102,47 @@ export const authRouter = createTRPCRouter({
       },
     };
   }),
+
+  createSession: publicProcedure
+    .input(createSessionSchema)
+    .mutation(async ({ ctx, input }) => {
+      const sessionToken = randomUUID();
+      const sessionExpiry = fromDate(60 * 60 * 24 * 30);
+
+      try {
+        const [createdSession] = await ctx.db
+          .insert(sessions)
+          .values({
+            sessionToken,
+            userId: input.userId,
+            expires: sessionExpiry,
+          })
+          .returning();
+
+        if (!createdSession) {
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Failed to create session",
+          });
+        }
+
+        const cookieStore = cookies();
+        cookieStore.set({
+          name: "authjs.session-token",
+          value: sessionToken,
+          expires: sessionExpiry,
+          httpOnly: true,
+          secure: process.env.NODE_ENV === "production",
+          sameSite: "lax",
+        });
+
+        return { success: true };
+      } catch (error) {
+        console.error("Error creating session:", error);
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "An error occurred while creating the session",
+        });
+      }
+    }),
 });

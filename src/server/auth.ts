@@ -13,10 +13,10 @@ import {
   verificationTokens,
 } from "@/server/db/schema";
 import { cookies } from "next/headers";
-import { randomUUID } from "crypto";
-import { fromDate, getUserRole } from "@/lib/utils";
+import { getUserRole } from "@/lib/utils";
 import { encode, decode } from "next-auth/jwt";
 import { getUserByEmail, updateUser } from "@/lib/user-utils";
+import { createSession } from "@/lib/auth-utils";
 
 /**
  * Module augmentation for `next-auth` types. Allows us to add custom properties to the `session`
@@ -58,27 +58,12 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
     },
     async signIn({ user, account }) {
       if (account?.provider === "credentials" && user.id) {
-        const sessionToken = randomUUID();
-        const sessionExpiry = fromDate(60 * 60 * 24 * 30);
-
         try {
-          const createdSession = await db.insert(sessions).values({
-            sessionToken: sessionToken,
-            userId: user.id,
-            expires: sessionExpiry,
-          });
+          const sessionCreated = await createSession({ userId: user.id });
 
-          if (!createdSession) return false;
-
-          const cookieStore = cookies();
-          cookieStore.set({
-            name: "authjs.session-token",
-            value: sessionToken,
-            expires: sessionExpiry,
-            httpOnly: true,
-            secure: process.env.NODE_ENV === "production",
-            sameSite: "lax",
-          });
+          if (!sessionCreated.success) {
+            return false;
+          }
 
           return true;
         } catch (error) {
