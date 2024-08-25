@@ -1,8 +1,7 @@
 import { randomUUID } from "crypto";
 import { cookies } from "next/headers";
-import { sessions } from "@/server/db/schema";
+import { sessions, users, accounts } from "@/server/db/schema";
 import { createTRPCRouter, publicProcedure } from "@/server/api/trpc";
-import { users, accounts } from "@/server/db/schema";
 import { TRPCError } from "@trpc/server";
 import { hash, compare } from "bcrypt";
 import { fromDate, getUserRole } from "@/lib/utils";
@@ -30,7 +29,6 @@ export const authRouter = createTRPCRouter({
       }
 
       const hashedPassword = await hash(password, 10);
-
       const fullName = `${firstName} ${lastName}`;
 
       const newUser = await ctx.db
@@ -73,11 +71,17 @@ export const authRouter = createTRPCRouter({
       where: (users, { eq }) => eq(users.email, email),
     });
 
-    // eslint-disable-next-line @typescript-eslint/prefer-optional-chain
-    if (!user || user.password === null) {
+    if (user?.password === null) {
       throw new TRPCError({
         code: "NOT_FOUND",
         message: "User not found or password not set",
+      });
+    }
+
+    if (!user) {
+      throw new TRPCError({
+        code: "NOT_FOUND",
+        message: "User not found",
       });
     }
 
