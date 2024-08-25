@@ -109,40 +109,32 @@ export const authRouter = createTRPCRouter({
       const sessionToken = randomUUID();
       const sessionExpiry = fromDate(60 * 60 * 24 * 30);
 
-      try {
-        const [createdSession] = await ctx.db
-          .insert(sessions)
-          .values({
-            sessionToken,
-            userId: input.userId,
-            expires: sessionExpiry,
-          })
-          .returning();
-
-        if (!createdSession) {
-          throw new TRPCError({
-            code: "INTERNAL_SERVER_ERROR",
-            message: "Failed to create session",
-          });
-        }
-
-        const cookieStore = cookies();
-        cookieStore.set({
-          name: "authjs.session-token",
-          value: sessionToken,
+      const [createdSession] = await ctx.db
+        .insert(sessions)
+        .values({
+          sessionToken,
+          userId: input.userId,
           expires: sessionExpiry,
-          httpOnly: true,
-          secure: process.env.NODE_ENV === "production",
-          sameSite: "lax",
-        });
+        })
+        .returning();
 
-        return { success: true };
-      } catch (error) {
-        console.error("Error creating session:", error);
+      if (!createdSession) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
-          message: "An error occurred while creating the session",
+          message: "Failed to create session",
         });
       }
+
+      const cookieStore = cookies();
+      cookieStore.set({
+        name: "authjs.session-token",
+        value: sessionToken,
+        expires: sessionExpiry,
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+      });
+
+      return { success: true };
     }),
 });
