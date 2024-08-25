@@ -9,20 +9,9 @@ import type {
 } from "@/schemas/user";
 import type { inferRouterOutputs } from "@trpc/server";
 import type { AppRouter } from "@/server/api/root";
-import { createCaller } from "@/server/api/root";
-import { createTRPCContext } from "@/server/api/trpc";
+import { getTrpcCaller } from "@/lib/create-caller";
 
 type UserRouterOutput = inferRouterOutputs<AppRouter>["user"];
-
-async function getTrpcCaller(
-  contextProps: Partial<Parameters<typeof createTRPCContext>[0]> = {},
-) {
-  const context = await createTRPCContext({
-    headers: contextProps.headers ?? new Headers(),
-    ...contextProps,
-  });
-  return createCaller(context);
-}
 
 export async function getUserByEmail(
   input: z.infer<typeof getUserByEmailSchema>,
