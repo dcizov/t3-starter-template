@@ -19,21 +19,23 @@ export const registerSchema = z
       .email("Please enter a valid email address"),
     password: z
       .string({ required_error: "Password is required" })
-      .min(8, "Password must have at least 6 characters")
+      .min(8, "Password must have at least 8 characters")
       .max(32, "Password must be up to 32 characters")
       .regex(
         new RegExp(
-          "^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[^a-zA-Z0-9]).{6,20}$",
+          "^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[^a-zA-Z0-9]).{6,32}$",
         ),
-        "Password must contain at least 1 small letter, 1 capital letter, 1 number and 1 special character",
+        "Password must contain at least 1 small letter, 1 capital letter, 1 number, and 1 special character",
       ),
     confirmPassword: z
       .string({ required_error: "Confirm your password is required" })
-      .min(8, "Password must have at least 6 characters")
-      .max(20, "Password must be up to 20 characters"),
+      .min(8, "Password must have at least 8 characters")
+      .max(32, "Password must be up to 32 characters")
+      .optional(),
+    role: z.string().min(2, "Role must have at least 2 characters").optional(),
   })
-  .refine((values) => values.password === values.confirmPassword, {
-    message: "Password and Confirm Password doesn't match!",
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Password and Confirm Password do not match!",
     path: ["confirmPassword"],
   });
 

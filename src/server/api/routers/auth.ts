@@ -54,7 +54,6 @@ export const authRouter = createTRPCRouter({
         return {
           success: true,
           message: "User registered successfully",
-          role: newUser[0].role,
         };
       } else {
         throw new TRPCError({
@@ -103,6 +102,7 @@ export const authRouter = createTRPCRouter({
         lastName: user.lastName,
         name: user.name,
         email: user.email,
+        role: user.role,
       },
     };
   }),

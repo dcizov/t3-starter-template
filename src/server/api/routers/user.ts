@@ -4,13 +4,16 @@ import { users } from "@/server/db/schema";
 import { TRPCError } from "@trpc/server";
 import { hash } from "bcrypt";
 import {
-  createUserSchema,
   updateUserSchema,
   deleteUserSchema,
   getUserByEmailSchema,
   getUserByIdSchema,
   getUserByNameSchema,
 } from "@/schemas/user";
+import { registerSchema } from "@/schemas/auth";
+import { registerUser } from "@/lib/auth-utils";
+import { getUserRole } from "@/lib/utils";
+import { getUserById } from "@/lib/user-utils";
 
 export const userRouter = createTRPCRouter({
   getByEmail: publicProcedure
@@ -69,59 +72,46 @@ export const userRouter = createTRPCRouter({
       return usersByName;
     }),
 
-  create: publicProcedure
-    .input(createUserSchema)
-    .mutation(async ({ ctx, input }) => {
-      const { firstName, lastName, email, password, role } = input;
+  create: publicProcedure.input(registerSchema).mutation(async ({ input }) => {
+    const { firstName, lastName, email, password } = input;
 
-      const existingUser = await ctx.db.query.users.findFirst({
-        where: (users, { eq }) => eq(users.email, email),
+    const hashedPassword = await hash(password, 10);
+
+    try {
+      const user = await registerUser({
+        firstName,
+        lastName,
+        email,
+        password: hashedPassword,
+        role: getUserRole(email),
       });
 
-      if (existingUser) {
-        throw new TRPCError({
-          code: "CONFLICT",
-          message: "User already exists",
-        });
-      }
-
-      const hashedPassword = await hash(password, 10);
-      const fullName = `${firstName} ${lastName}`;
-
-      const newUser = await ctx.db
-        .insert(users)
-        .values({
-          firstName,
-          lastName,
-          name: fullName,
-          email,
-          password: hashedPassword,
-          role,
-        })
-        .returning();
-
-      if (!newUser[0]) {
+      if (!user.success) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
-          message: "Failed to create user",
+          message: user.message || "Failed to create user",
         });
       }
 
       return {
         success: true,
         message: "User created successfully",
-        user: newUser[0],
       };
-    }),
+    } catch (error) {
+      console.error("Error in create procedure:", error);
+      throw new TRPCError({
+        code: "INTERNAL_SERVER_ERROR",
+        message: "Failed to create user",
+      });
+    }
+  }),
 
   update: publicProcedure
     .input(updateUserSchema)
     .mutation(async ({ ctx, input }) => {
       const { id, firstName, lastName, email, password, role } = input;
 
-      const user = await ctx.db.query.users.findFirst({
-        where: (users, { eq }) => eq(users.id, id),
-      });
+      const user = await getUserById({ id });
 
       if (!user) {
         throw new TRPCError({
@@ -163,9 +153,7 @@ export const userRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const { id } = input;
 
-      const user = await ctx.db.query.users.findFirst({
-        where: (users, { eq }) => eq(users.id, id),
-      });
+      const user = await getUserById({ id });
 
       if (!user) {
         throw new TRPCError({

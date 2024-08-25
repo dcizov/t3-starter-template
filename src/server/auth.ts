@@ -4,7 +4,6 @@ import { type Adapter } from "next-auth/adapters";
 import Google, { type GoogleProfile } from "next-auth/providers/google";
 import Github, { type GitHubProfile } from "next-auth/providers/github";
 import Credentials from "next-auth/providers/credentials";
-import { compareSync } from "bcrypt";
 import { db } from "@/server/db";
 import {
   accounts,
@@ -15,8 +14,8 @@ import {
 import { cookies } from "next/headers";
 import { getUserRole } from "@/lib/utils";
 import { encode, decode } from "next-auth/jwt";
-import { getUserByEmail, updateUser } from "@/lib/user-utils";
-import { createSession } from "@/lib/auth-utils";
+import { updateUser } from "@/lib/user-utils";
+import { createSession, loginUser } from "@/lib/auth-utils";
 
 /**
  * Module augmentation for `next-auth` types. Allows us to add custom properties to the `session`
@@ -85,6 +84,7 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
     Github({
       profile(profile: GitHubProfile) {
         const [firstName, lastName] = (profile.name ?? "").split(" ");
+
         return {
           id: profile.id.toString(),
           email: profile.email,
@@ -118,27 +118,16 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
         if (!credentials?.email || !credentials.password) return null;
 
         try {
-          const user = await getUserByEmail({
+          const res = await loginUser({
             email: credentials.email as string,
+            password: credentials.password as string,
           });
 
-          if (!user?.password) return null;
+          if (!res.success || !res.user) {
+            return null;
+          }
 
-          const isPasswordValid = compareSync(
-            credentials.password as string,
-            user.password,
-          );
-
-          if (!isPasswordValid) return null;
-
-          return {
-            id: user.id,
-            email: user.email,
-            firstName: user.firstName,
-            lastName: user.lastName,
-            name: user.name,
-            role: user.role,
-          };
+          return res.user;
         } catch (error) {
           console.error("Error authorizing credentials:", error);
           return null;
