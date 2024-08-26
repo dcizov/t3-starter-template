@@ -1,12 +1,12 @@
 import { randomUUID } from "crypto";
 import { hash, compare } from "bcrypt";
-import { accounts, sessions } from "@/server/db/schema";
+import { accounts, sessions, users } from "@/server/db/schema";
 import { fromDate, getUserRole } from "@/lib/utils";
 import { generateVerificationToken } from "@/server/api/utils/token";
 import { sendEmail } from "@/lib/mail";
 import { type createTRPCContext } from "@/server/api/trpc";
 import { cookies } from "next/headers";
-import { findUserByEmail, updateUserById } from "@/server/api/utils/user";
+import { findUserByEmail } from "@/server/api/utils/user";
 import { db } from "@/server/db";
 
 type Context =
@@ -39,14 +39,17 @@ export async function registerUser(
   const hashedPassword = await hash(password, 10);
   const fullName = `${firstName} ${lastName}`;
 
-  const newUser = await updateUserById(ctx, randomUUID(), {
-    firstName,
-    lastName,
-    name: fullName,
-    email,
-    password: hashedPassword,
-    role: getUserRole(email),
-  });
+  const [newUser] = await dbInstance
+    .insert(users)
+    .values({
+      firstName,
+      lastName,
+      name: fullName,
+      email,
+      password: hashedPassword,
+      role: getUserRole(email),
+    })
+    .returning();
 
   if (newUser) {
     await dbInstance.insert(accounts).values({
