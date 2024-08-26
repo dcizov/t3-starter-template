@@ -1,52 +1,22 @@
-import { randomUUID } from "crypto";
 import { createTRPCRouter, publicProcedure } from "@/server/api/trpc";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
-import { credentialsVerificationTokens } from "@/server/db/schema";
-import { fromDate } from "@/lib/utils";
 import {
-  deleteVerificationToken,
-  getVerificationTokenByEmail,
+  generateVerificationToken,
   getVerificationTokenById,
-} from "@/lib/token-utils";
-import { eq } from "drizzle-orm";
+  getVerificationTokenByEmail,
+  getVerificationTokenByToken,
+  deleteVerificationToken,
+} from "@/server/api/utils/token";
 
 export const tokenRouter = createTRPCRouter({
   generateVerificationToken: publicProcedure
     .input(z.object({ email: z.string().email() }))
     .mutation(async ({ ctx, input }) => {
-      const { email } = input;
-      const token = randomUUID();
-      const expires = fromDate(60 * 60 * 24);
-
-      try {
-        const existingToken = await getVerificationTokenByEmail({ email });
-
-        if (existingToken) {
-          await deleteVerificationToken({ id: existingToken.id });
-        }
-      } catch (error) {
-        if (!(error instanceof TRPCError) || error.code !== "NOT_FOUND") {
-          console.error(
-            "Unexpected error while checking for existing token:",
-            error,
-          );
-          throw new TRPCError({
-            code: "INTERNAL_SERVER_ERROR",
-            message:
-              "An unexpected error occurred while processing your request",
-          });
-        }
-      }
-
-      const [verificationToken] = await ctx.db
-        .insert(credentialsVerificationTokens)
-        .values({
-          token,
-          email,
-          expires,
-        })
-        .returning();
+      const verificationToken = await generateVerificationToken(
+        ctx,
+        input.email,
+      );
 
       if (!verificationToken) {
         throw new TRPCError({
@@ -65,13 +35,7 @@ export const tokenRouter = createTRPCRouter({
   getVerificationTokenById: publicProcedure
     .input(z.object({ id: z.string().uuid() }))
     .query(async ({ ctx, input }) => {
-      const { id } = input;
-
-      const verificationToken =
-        await ctx.db.query.credentialsVerificationTokens.findFirst({
-          where: (credentialsVerificationTokens, { eq }) =>
-            eq(credentialsVerificationTokens.id, id),
-        });
+      const verificationToken = await getVerificationTokenById(ctx, input.id);
 
       if (!verificationToken) {
         throw new TRPCError({
@@ -86,13 +50,10 @@ export const tokenRouter = createTRPCRouter({
   getVerificationTokenByEmail: publicProcedure
     .input(z.object({ email: z.string().email() }))
     .query(async ({ ctx, input }) => {
-      const { email } = input;
-
-      const verificationToken =
-        await ctx.db.query.credentialsVerificationTokens.findFirst({
-          where: (credentialsVerificationTokens, { eq }) =>
-            eq(credentialsVerificationTokens.email, email),
-        });
+      const verificationToken = await getVerificationTokenByEmail(
+        ctx,
+        input.email,
+      );
 
       if (!verificationToken) {
         throw new TRPCError({
@@ -107,13 +68,10 @@ export const tokenRouter = createTRPCRouter({
   getVerificationTokenByToken: publicProcedure
     .input(z.object({ token: z.string().uuid() }))
     .query(async ({ ctx, input }) => {
-      const { token } = input;
-
-      const verificationToken =
-        await ctx.db.query.credentialsVerificationTokens.findFirst({
-          where: (credentialsVerificationTokens, { eq }) =>
-            eq(credentialsVerificationTokens.token, token),
-        });
+      const verificationToken = await getVerificationTokenByToken(
+        ctx,
+        input.token,
+      );
 
       if (!verificationToken) {
         throw new TRPCError({
@@ -128,20 +86,14 @@ export const tokenRouter = createTRPCRouter({
   deleteVerificationToken: publicProcedure
     .input(z.object({ id: z.string().uuid() }))
     .mutation(async ({ ctx, input }) => {
-      const { id } = input;
+      const success = await deleteVerificationToken(ctx, input.id);
 
-      const verificationToken = await getVerificationTokenById({ id });
-
-      if (!verificationToken) {
+      if (!success) {
         throw new TRPCError({
           code: "NOT_FOUND",
           message: "Verification token not found",
         });
       }
-
-      await ctx.db
-        .delete(credentialsVerificationTokens)
-        .where(eq(credentialsVerificationTokens.id, id));
 
       return {
         success: true,

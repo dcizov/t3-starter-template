@@ -1,0 +1,1 @@
+ALTER TABLE "t3-starter-template_user" ALTER COLUMN "email_verified" SET DEFAULT NULL;

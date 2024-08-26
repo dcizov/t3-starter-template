@@ -6,7 +6,7 @@ import type {
 } from "@/schemas/auth";
 import type { inferRouterOutputs } from "@trpc/server";
 import type { AppRouter } from "@/server/api/root";
-import { getTrpcCaller } from "@/lib/create-caller";
+import { getTrpcCaller } from "@/server/api/callers/caller";
 
 type AuthRouterOutput = inferRouterOutputs<AppRouter>["auth"];
 

@@ -1,6 +1,4 @@
 import { createTRPCRouter, publicProcedure } from "@/server/api/trpc";
-import { eq } from "drizzle-orm";
-import { users } from "@/server/db/schema";
 import { TRPCError } from "@trpc/server";
 import { hash } from "bcrypt";
 import {
@@ -11,18 +9,20 @@ import {
   getUserByNameSchema,
 } from "@/schemas/user";
 import { registerSchema } from "@/schemas/auth";
-import { registerUser } from "@/lib/auth-utils";
-import { getUserRole } from "@/lib/utils";
-import { getUserById } from "@/lib/user-utils";
+import {
+  findUserByEmail,
+  findUserById,
+  findUsersByName,
+  updateUserById,
+  deleteUserById,
+} from "@/server/api/utils/user";
+import { registerUser } from "@/server/api/utils/auth";
 
 export const userRouter = createTRPCRouter({
   getByEmail: publicProcedure
     .input(getUserByEmailSchema)
     .query(async ({ ctx, input }) => {
-      const user = await ctx.db.query.users.findFirst({
-        where: (users, { eq }) => eq(users.email, input.email),
-      });
-
+      const user = await findUserByEmail(ctx, input.email);
       if (!user) {
         throw new TRPCError({
           code: "NOT_FOUND",
@@ -36,10 +36,7 @@ export const userRouter = createTRPCRouter({
   getById: publicProcedure
     .input(getUserByIdSchema)
     .query(async ({ ctx, input }) => {
-      const user = await ctx.db.query.users.findFirst({
-        where: (users, { eq }) => eq(users.id, input.id),
-      });
-
+      const user = await findUserById(ctx, input.id);
       if (!user) {
         throw new TRPCError({
           code: "NOT_FOUND",
@@ -58,61 +55,56 @@ export const userRouter = createTRPCRouter({
   getByName: publicProcedure
     .input(getUserByNameSchema)
     .query(async ({ ctx, input }) => {
-      const usersByName = await ctx.db.query.users.findMany({
-        where: (users, { like }) => like(users.name, `%${input.name}%`),
-      });
-
-      if (usersByName.length === 0) {
+      const users = await findUsersByName(ctx, input.name);
+      if (users.length === 0) {
         throw new TRPCError({
           code: "NOT_FOUND",
           message: "No users found with the given name",
         });
       }
 
-      return usersByName;
+      return users;
     }),
 
-  create: publicProcedure.input(registerSchema).mutation(async ({ input }) => {
-    const { firstName, lastName, email, password } = input;
+  create: publicProcedure
+    .input(registerSchema)
+    .mutation(async ({ ctx, input }) => {
+      const { firstName, lastName, email, password } = input;
 
-    const hashedPassword = await hash(password, 10);
-
-    try {
-      const user = await registerUser({
+      const user = await registerUser(
+        ctx,
         firstName,
         lastName,
         email,
-        password: hashedPassword,
-        role: getUserRole(email),
-      });
+        password,
+      );
 
-      if (!user.success) {
+      if (!user) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
-          message: user.message || "Failed to create user",
+          message: "Failed to create user",
         });
       }
 
       return {
         success: true,
         message: "User created successfully",
+        user: {
+          id: user.id,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          email: user.email,
+          role: user.role,
+        },
       };
-    } catch (error) {
-      console.error("Error in create procedure:", error);
-      throw new TRPCError({
-        code: "INTERNAL_SERVER_ERROR",
-        message: "Failed to create user",
-      });
-    }
-  }),
+    }),
 
   update: publicProcedure
     .input(updateUserSchema)
     .mutation(async ({ ctx, input }) => {
       const { id, firstName, lastName, email, password, role } = input;
 
-      const user = await getUserById({ id });
-
+      const user = await findUserById(ctx, id);
       if (!user) {
         throw new TRPCError({
           code: "NOT_FOUND",
@@ -128,13 +120,9 @@ export const userRouter = createTRPCRouter({
       if (role) updateData.role = role;
       if (password) updateData.password = await hash(password, 10);
 
-      const updatedUser = await ctx.db
-        .update(users)
-        .set(updateData)
-        .where(eq(users.id, id))
-        .returning();
+      const updatedUser = await updateUserById(ctx, id, updateData);
 
-      if (!updatedUser[0]) {
+      if (!updatedUser) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Failed to update user",
@@ -144,17 +132,14 @@ export const userRouter = createTRPCRouter({
       return {
         success: true,
         message: "User updated successfully",
-        user: updatedUser[0],
+        user: updatedUser,
       };
     }),
 
   delete: publicProcedure
     .input(deleteUserSchema)
     .mutation(async ({ ctx, input }) => {
-      const { id } = input;
-
-      const user = await getUserById({ id });
-
+      const user = await findUserById(ctx, input.id);
       if (!user) {
         throw new TRPCError({
           code: "NOT_FOUND",
@@ -162,7 +147,13 @@ export const userRouter = createTRPCRouter({
         });
       }
 
-      await ctx.db.delete(users).where(eq(users.id, id));
+      const deleted = await deleteUserById(ctx, input.id);
+      if (!deleted) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to delete user",
+        });
+      }
 
       return {
         success: true,

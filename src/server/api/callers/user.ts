@@ -9,7 +9,7 @@ import type {
 } from "@/schemas/user";
 import type { inferRouterOutputs } from "@trpc/server";
 import type { AppRouter } from "@/server/api/root";
-import { getTrpcCaller } from "@/lib/create-caller";
+import { getTrpcCaller } from "@/server/api/callers/caller";
 
 type UserRouterOutput = inferRouterOutputs<AppRouter>["user"];
 

@@ -14,8 +14,8 @@ import {
 import { cookies } from "next/headers";
 import { getUserRole } from "@/lib/utils";
 import { encode, decode } from "next-auth/jwt";
-import { updateUser } from "@/lib/user-utils";
-import { createSession, loginUser } from "@/lib/auth-utils";
+import { updateUser } from "@/server/api/callers/user";
+import { createSession, loginUser } from "@/server/api/callers/auth";
 
 /**
  * Module augmentation for `next-auth` types. Allows us to add custom properties to the `session`
