@@ -13,6 +13,12 @@ type Context =
 
 /**
  * Registers a new user and returns the new user if successful, otherwise null.
+ * @param ctx The database context
+ * @param firstName The user's first name
+ * @param lastName The user's last name
+ * @param email The user's email address
+ * @param password The user's password (will be hashed)
+ * @returns The newly created user object if successful, otherwise null
  */
 export async function registerUser(
   ctx: Context,
@@ -60,6 +66,10 @@ export async function registerUser(
 
 /**
  * Logs in a user by verifying their credentials and returns the user data if successful, otherwise null.
+ * @param ctx The database context
+ * @param email The user's email address
+ * @param password The password to verify
+ * @returns An object with user data if login is successful, otherwise null
  */
 export async function loginUser(ctx: Context, email: string, password: string) {
   const user = await findUserByEmail(ctx, email);
@@ -89,7 +99,10 @@ export async function loginUser(ctx: Context, email: string, password: string) {
 }
 
 /**
- * Creates a new session for the user and returns true if successful, otherwise false.
+ * Creates a new session for the user and sets a session cookie.
+ * @param ctx The database context
+ * @param userId The ID of the user to create a session for
+ * @returns True if the session was successfully created, otherwise false
  */
 export async function createSession(ctx: Context, userId: string) {
   const sessionToken = randomUUID();
