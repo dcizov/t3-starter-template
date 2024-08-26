@@ -48,6 +48,7 @@ export async function registerUser(
       email,
       password: hashedPassword,
       role: getUserRole(email),
+      emailVerified: null,
     })
     .returning();
 

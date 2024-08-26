@@ -16,6 +16,7 @@ import { getUserRole } from "@/lib/utils";
 import { encode, decode } from "next-auth/jwt";
 import { updateUserById } from "@/server/api/utils/user";
 import { createSession, loginUser } from "@/server/api/utils/auth";
+import credentials from "next-auth/providers/credentials";
 
 /**
  * Module augmentation for `next-auth` types. Allows us to add custom properties to the `session`
@@ -141,18 +142,20 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
     }),
   ],
   events: {
-    linkAccount: async ({ user }) => {
+    linkAccount: async ({ user, account }) => {
       if (!user.id) {
         console.error("User ID is undefined");
         return;
       }
 
-      try {
-        await updateUserById(undefined, user.id, {
-          emailVerified: new Date(),
-        });
-      } catch (error) {
-        console.error("Error linking account:", error);
+      if (account.provider !== "credentials") {
+        try {
+          await updateUserById(undefined, user.id, {
+            emailVerified: new Date(),
+          });
+        } catch (error) {
+          console.error("Error linking account:", error);
+        }
       }
     },
   },
