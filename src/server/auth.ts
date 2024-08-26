@@ -14,8 +14,8 @@ import {
 import { cookies } from "next/headers";
 import { getUserRole } from "@/lib/utils";
 import { encode, decode } from "next-auth/jwt";
-import { updateUser } from "@/server/api/callers/user";
-import { createSession, loginUser } from "@/server/api/callers/auth";
+import { updateUserById } from "@/server/api/utils/user";
+import { createSession, loginUser } from "@/server/api/utils/auth";
 
 /**
  * Module augmentation for `next-auth` types. Allows us to add custom properties to the `session`
@@ -45,7 +45,7 @@ declare module "next-auth" {
  */
 export const { auth, handlers, signIn, signOut } = NextAuth({
   callbacks: {
-    async session({ session, user }) {
+    session: async ({ session, user }) => {
       return {
         ...session,
         user: {
@@ -55,16 +55,16 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
         },
       };
     },
-    async signIn({ user, account }) {
+    signIn: async ({ user, account }) => {
       if (
         account?.provider === "credentials" &&
         user.id &&
         user.emailVerified
       ) {
         try {
-          const sessionCreated = await createSession({ userId: user.id });
+          const sessionCreated = await createSession(undefined, user.id);
 
-          if (!sessionCreated.success) {
+          if (!sessionCreated) {
             return false;
           }
 
@@ -122,16 +122,17 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
         if (!credentials?.email || !credentials.password) return null;
 
         try {
-          const res = await loginUser({
-            email: credentials.email as string,
-            password: credentials.password as string,
-          });
+          const user = await loginUser(
+            undefined,
+            credentials.email as string,
+            credentials.password as string,
+          );
 
-          if (!res.success || !res.user) {
+          if (!user) {
             return null;
           }
 
-          return res.user;
+          return user;
         } catch (error) {
           console.error("Error authorizing credentials:", error);
           return null;
@@ -147,8 +148,7 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
       }
 
       try {
-        await updateUser({
-          id: user.id,
+        await updateUserById(undefined, user.id, {
           emailVerified: new Date(),
         });
       } catch (error) {

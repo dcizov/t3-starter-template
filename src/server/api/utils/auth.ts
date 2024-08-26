@@ -7,13 +7,14 @@ import { sendEmail } from "@/lib/mail";
 import { type createTRPCContext } from "@/server/api/trpc";
 import { cookies } from "next/headers";
 import { findUserByEmail, updateUserById } from "@/server/api/utils/user";
+import { db } from "@/server/db";
 
 type Context =
   ReturnType<typeof createTRPCContext> extends Promise<infer T> ? T : never;
 
 /**
  * Registers a new user and returns the new user if successful, otherwise null.
- * @param ctx The database context
+ * @param ctx The database context (optional)
  * @param firstName The user's first name
  * @param lastName The user's last name
  * @param email The user's email address
@@ -21,12 +22,14 @@ type Context =
  * @returns The newly created user object if successful, otherwise null
  */
 export async function registerUser(
-  ctx: Context,
+  ctx: Context | undefined,
   firstName: string,
   lastName: string,
   email: string,
   password: string,
 ) {
+  const dbInstance = ctx?.db ?? db;
+
   const existingUser = await findUserByEmail(ctx, email);
 
   if (existingUser) {
@@ -46,7 +49,7 @@ export async function registerUser(
   });
 
   if (newUser) {
-    await ctx.db.insert(accounts).values({
+    await dbInstance.insert(accounts).values({
       userId: newUser.id,
       type: "email",
       provider: "credentials",
@@ -66,12 +69,16 @@ export async function registerUser(
 
 /**
  * Logs in a user by verifying their credentials and returns the user data if successful, otherwise null.
- * @param ctx The database context
+ * @param ctx The database context (optional)
  * @param email The user's email address
  * @param password The password to verify
  * @returns An object with user data if login is successful, otherwise null
  */
-export async function loginUser(ctx: Context, email: string, password: string) {
+export async function loginUser(
+  ctx: Context | undefined,
+  email: string,
+  password: string,
+) {
   const user = await findUserByEmail(ctx, email);
 
   if (user?.password === null) {
@@ -100,15 +107,16 @@ export async function loginUser(ctx: Context, email: string, password: string) {
 
 /**
  * Creates a new session for the user and sets a session cookie.
- * @param ctx The database context
+ * @param ctx The database context (optional)
  * @param userId The ID of the user to create a session for
  * @returns True if the session was successfully created, otherwise false
  */
-export async function createSession(ctx: Context, userId: string) {
+export async function createSession(ctx: Context | undefined, userId: string) {
+  const dbInstance = ctx?.db ?? db;
   const sessionToken = randomUUID();
-  const sessionExpiry = fromDate(60 * 60 * 24 * 30); // 30 days
+  const sessionExpiry = fromDate(60 * 60 * 24 * 30);
 
-  const [createdSession] = await ctx.db
+  const [createdSession] = await dbInstance
     .insert(sessions)
     .values({
       sessionToken,
