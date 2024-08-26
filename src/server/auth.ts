@@ -16,7 +16,6 @@ import { getUserRole } from "@/lib/utils";
 import { encode, decode } from "next-auth/jwt";
 import { updateUserById } from "@/server/api/utils/user";
 import { createSession, loginUser } from "@/server/api/utils/auth";
-import credentials from "next-auth/providers/credentials";
 
 /**
  * Module augmentation for `next-auth` types. Allows us to add custom properties to the `session`
