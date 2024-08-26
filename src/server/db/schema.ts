@@ -32,7 +32,7 @@ export const users = createTable("user", {
   emailVerified: timestamp("email_verified", {
     mode: "date",
     withTimezone: true,
-  }).default(sql`CURRENT_TIMESTAMP`),
+  }).default(sql`NULL`),
   image: varchar("image", { length: 255 }),
   password: varchar("password", { length: 255 }),
   role: varchar("role", { length: 255 }).notNull(),
@@ -110,5 +110,23 @@ export const verificationTokens = createTable(
   },
   (vt) => ({
     compoundKey: primaryKey({ columns: [vt.identifier, vt.token] }),
+  }),
+);
+
+export const credentialsVerificationTokens = createTable(
+  "credentials_verification_token",
+  {
+    id: varchar("id", { length: 255 })
+      .notNull()
+      .$defaultFn(() => crypto.randomUUID()),
+    email: varchar("email", { length: 255 }).notNull(),
+    token: varchar("token", { length: 255 }).notNull(),
+    expires: timestamp("expires", {
+      mode: "date",
+      withTimezone: true,
+    }).notNull(),
+  },
+  (cvt) => ({
+    compoundKey: primaryKey({ columns: [cvt.email, cvt.token] }),
   }),
 );

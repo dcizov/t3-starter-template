@@ -64,7 +64,15 @@ export default function SignInForm() {
       router.push("/dashboard");
     },
     onError: (error) => {
-      if (error.data?.zodError) {
+      if (
+        error.data?.code === "UNAUTHORIZED" &&
+        error.message === "Email not verified"
+      ) {
+        toast.error("Email not verified", {
+          description: "Please verify your email before logging in.",
+        });
+        // Optionally, you could provide a button or link to resend verification email here
+      } else if (error.data?.zodError) {
         for (const [field, messages] of Object.entries(
           error.data.zodError.fieldErrors,
         )) {
@@ -74,8 +82,8 @@ export default function SignInForm() {
           });
         }
       } else {
-        toast.error("Something went wrong!", {
-          description: error.message,
+        toast.error("Login failed", {
+          description: error.message || "An unexpected error occurred",
         });
       }
     },

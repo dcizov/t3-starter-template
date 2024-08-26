@@ -56,7 +56,11 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
       };
     },
     async signIn({ user, account }) {
-      if (account?.provider === "credentials" && user.id) {
+      if (
+        account?.provider === "credentials" &&
+        user.id &&
+        user.emailVerified
+      ) {
         try {
           const sessionCreated = await createSession({ userId: user.id });
 

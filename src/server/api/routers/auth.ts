@@ -10,6 +10,8 @@ import {
   loginSchema,
   createSessionSchema,
 } from "@/schemas/auth";
+import { generateVerificationToken } from "@/lib/token-utils";
+import { sendEmail } from "@/lib/mail";
 
 export const authRouter = createTRPCRouter({
   register: publicProcedure
@@ -51,6 +53,9 @@ export const authRouter = createTRPCRouter({
           providerAccountId: newUser[0].id,
         });
 
+        const verificationToken = await generateVerificationToken({ email });
+        await sendEmail(verificationToken.email, verificationToken.token);
+
         return {
           success: true,
           message: "User registered successfully",
@@ -77,10 +82,10 @@ export const authRouter = createTRPCRouter({
       });
     }
 
-    if (!user) {
+    if (!user?.emailVerified) {
       throw new TRPCError({
-        code: "NOT_FOUND",
-        message: "User not found",
+        code: "UNAUTHORIZED",
+        message: "Email not verified",
       });
     }
 
