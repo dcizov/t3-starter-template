@@ -10,7 +10,7 @@ import {
 } from "@/server/db/schema";
 import { cookies } from "next/headers";
 import { encode, decode } from "next-auth/jwt";
-import { updateUserById } from "@/server/api/utils/user";
+import { updateUserById, findUserById } from "@/server/api/utils/user";
 import { createSession } from "@/server/api/utils/auth";
 import authConfig from "@/server/auth.config";
 
@@ -31,7 +31,7 @@ declare module "next-auth" {
   interface User {
     id?: string;
     role: string;
-    emailVerified?: Date;
+    emailVerified?: Date | null;
   }
 }
 
@@ -53,23 +53,24 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
       };
     },
     signIn: async ({ user, account }) => {
-      if (
-        account?.provider === "credentials" &&
-        user.id &&
-        user.emailVerified
-      ) {
-        try {
-          const sessionCreated = await createSession(undefined, user.id);
+      if (account?.provider === "credentials") {
+        if (user.id) {
+          try {
+            const sessionCreated = await createSession(undefined, user.id);
 
-          if (!sessionCreated) {
+            if (!sessionCreated) {
+              return false;
+            }
+
+            return true;
+          } catch (error) {
+            console.error("Error creating session:", error);
             return false;
           }
-
-          return true;
-        } catch (error) {
-          console.error("Error creating session:", error);
-          return false;
         }
+
+        const existingUser = await findUserById(undefined, user.id!);
+        if (!existingUser?.emailVerified) return false;
       }
 
       return true;

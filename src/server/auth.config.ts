@@ -50,8 +50,8 @@ const authConfig: NextAuthConfig = {
             credentials.password as string,
           );
 
-          if (result?.success && result.user) {
-            return result.user;
+          if (result.success && result.user) {
+            return result.user.emailVerified ? result.user : null;
           } else {
             return null;
           }
