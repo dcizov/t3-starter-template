@@ -44,17 +44,17 @@ const authConfig: NextAuthConfig = {
         if (!credentials?.email || !credentials.password) return null;
 
         try {
-          const user = await loginUser(
+          const result = await loginUser(
             undefined,
             credentials.email as string,
             credentials.password as string,
           );
 
-          if (!user) {
+          if (result?.success && result.user) {
+            return result.user;
+          } else {
             return null;
           }
-
-          return user;
         } catch (error) {
           console.error("Error authorizing credentials:", error);
           return null;

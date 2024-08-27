@@ -72,11 +72,12 @@ export async function registerUser(
 }
 
 /**
- * Logs in a user by verifying their credentials and returns the user data if successful, otherwise null.
+ * Logs in a user by verifying their credentials and returns the user data if successful.
+ * If login fails, returns an object with error details.
  * @param ctx The database context (optional)
  * @param email The user's email address
  * @param password The password to verify
- * @returns An object with user data if login is successful, otherwise null
+ * @returns An object with either user data or error information.
  */
 export async function loginUser(
   ctx: Context | undefined,
@@ -85,27 +86,30 @@ export async function loginUser(
 ) {
   const user = await findUserByEmail(ctx, email);
 
-  if (user?.password === null) {
-    return null;
+  if (!user) {
+    return { success: false, error: "USER_NOT_FOUND" };
   }
 
-  if (!user?.emailVerified) {
-    return null;
+  if (!user.emailVerified) {
+    return { success: false, error: "EMAIL_NOT_VERIFIED" };
   }
 
-  const isPasswordValid = await compare(password, user.password);
+  const isPasswordValid = await compare(password, user.password!);
 
   if (!isPasswordValid) {
-    return null;
+    return { success: false, error: "INVALID_CREDENTIALS" };
   }
 
   return {
-    id: user.id,
-    firstName: user.firstName,
-    lastName: user.lastName,
-    name: user.name,
-    email: user.email,
-    role: user.role,
+    success: true,
+    user: {
+      id: user.id,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+    },
   };
 }
 

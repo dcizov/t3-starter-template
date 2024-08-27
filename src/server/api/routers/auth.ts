@@ -41,19 +41,40 @@ export const authRouter = createTRPCRouter({
   login: publicProcedure.input(loginSchema).mutation(async ({ ctx, input }) => {
     const { email, password } = input;
 
-    const user = await loginUser(ctx, email, password);
+    const res = await loginUser(ctx, email, password);
 
-    if (!user) {
-      throw new TRPCError({
-        code: "UNAUTHORIZED",
-        message: "Invalid credentials or email not verified",
-      });
+    if (!res.success) {
+      const errorMap: Record<string, TRPCError> = {
+        USER_NOT_FOUND: new TRPCError({
+          code: "NOT_FOUND",
+          message: "User does not exist",
+        }),
+        EMAIL_NOT_VERIFIED: new TRPCError({
+          code: "UNAUTHORIZED",
+          message: "Email not verified",
+        }),
+        INVALID_CREDENTIALS: new TRPCError({
+          code: "UNAUTHORIZED",
+          message: "Invalid credentials",
+        }),
+      };
+
+      const error = res.error ? errorMap[res.error] : undefined;
+
+      if (error) {
+        throw error;
+      } else {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "An unexpected error occurred",
+        });
+      }
     }
 
     return {
       success: true,
       message: "Login successful",
-      user,
+      user: res.user,
     };
   }),
 
