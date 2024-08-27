@@ -6,6 +6,7 @@ import {
   CardTitle,
   CardDescription,
 } from "@/app/_components/ui/card";
+import { LoaderCircle } from "lucide-react";
 import { Toaster } from "@/app/_components/ui/sonner";
 import { toast } from "sonner";
 import { api } from "@/trpc/react";
@@ -90,6 +91,7 @@ export default function VerifyEmailForm() {
     });
   }, [onSubmit, token]);
 
+  // TODO: add resend email logic after token expired
   return (
     <>
       <Toaster
@@ -110,11 +112,17 @@ export default function VerifyEmailForm() {
           </CardTitle>
           <CardDescription className="text-sm text-muted-foreground sm:text-base">
             {isLoading
-              ? "We are verifying your email. Please wait..."
-              : "We have sent a verification email to your inbox. Please check your email and click on the link to verify your account."}
+              ? "Verifying your email. Please wait..."
+              : "Verification email sent. Please check your email and click on the link to verify your account."}
           </CardDescription>
         </CardHeader>
-        {isLoading && <div className="flex justify-center pt-4">...</div>}
+        {isLoading && (
+          <div className="flex justify-center pt-4">
+            <span className="animate-spin">
+              <LoaderCircle size={24} />
+            </span>
+          </div>
+        )}
       </div>
     </>
   );
