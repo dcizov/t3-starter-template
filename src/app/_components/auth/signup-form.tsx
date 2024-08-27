@@ -45,12 +45,24 @@ export default function SignUpForm() {
   });
 
   const { mutateAsync } = api.auth.register.useMutation({
-    onSuccess: async () => {
-      toast.success("Account Created", {
-        description: "Please sign in with your new account.",
-      });
+    onSuccess: async (data) => {
+      if (data.emailSent) {
+        toast.success("Account Created", {
+          description:
+            "A verification email has been sent. Please check your inbox and verify your account before signing in.",
+          duration: 8000,
+        });
+      } else {
+        toast.success("Account Created", {
+          description:
+            "Your account has been created, but we couldn't send a verification email. Please contact support.",
+          duration: 8000,
+        });
+      }
 
-      router.push("/signin");
+      setTimeout(() => {
+        router.push("/signin");
+      }, 8000);
     },
     onError: (error) => {
       if (error.data?.zodError) {
@@ -63,8 +75,9 @@ export default function SignUpForm() {
           });
         }
       } else {
-        toast.error("Something went wrong!", {
-          description: error.message,
+        toast.error("Registration failed", {
+          description: error.message || "Something went wrong!",
+          duration: 5000,
         });
       }
     },

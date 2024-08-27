@@ -53,15 +53,19 @@ export default function SignInForm() {
       if (!response?.ok) {
         toast.error("Login failed", {
           description: response?.error ?? "Invalid credentials",
+          duration: 5000,
         });
         return;
       }
 
       toast.success("Welcome back!", {
         description: "Redirecting you to your dashboard!",
+        duration: 3000,
       });
 
-      router.push("/dashboard");
+      setTimeout(() => {
+        router.push("/dashboard");
+      }, 3000);
     },
     onError: (error) => {
       let errorMessage = "An unexpected error occurred";
@@ -87,6 +91,7 @@ export default function SignInForm() {
 
       toast.error("Login failed", {
         description: errorMessage,
+        duration: 5000,
       });
     },
   });

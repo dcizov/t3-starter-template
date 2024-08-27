@@ -1,5 +1,6 @@
 import { createTRPCRouter, publicProcedure } from "@/server/api/trpc";
 import { TRPCError } from "@trpc/server";
+import { z } from "zod";
 import {
   registerSchema,
   loginSchema,
@@ -9,7 +10,12 @@ import {
   registerUser,
   loginUser,
   createSession,
+  verifyEmailToken,
 } from "@/server/api/utils/auth";
+
+const verifyEmailSchema = z.object({
+  token: z.string().nonempty("Token is required"),
+});
 
 export const authRouter = createTRPCRouter({
   register: publicProcedure
@@ -17,7 +23,7 @@ export const authRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const { firstName, lastName, email, password } = input;
 
-      const newUser = await registerUser(
+      const result = await registerUser(
         ctx,
         firstName,
         lastName,
@@ -25,7 +31,7 @@ export const authRouter = createTRPCRouter({
         password,
       );
 
-      if (!newUser) {
+      if (!result) {
         throw new TRPCError({
           code: "CONFLICT",
           message: "User already exists or failed to create user",
@@ -35,6 +41,7 @@ export const authRouter = createTRPCRouter({
       return {
         success: true,
         message: "User registered successfully",
+        emailSent: result.verificationEmailSent,
       };
     }),
 
@@ -91,5 +98,51 @@ export const authRouter = createTRPCRouter({
       }
 
       return { success: true };
+    }),
+
+  verifyEmail: publicProcedure
+    .input(verifyEmailSchema)
+    .mutation(async ({ ctx, input }) => {
+      const { token } = input;
+
+      const res = await verifyEmailToken(ctx, token);
+      console.log(res);
+
+      if (!res.success) {
+        const errorMap: Record<string, TRPCError> = {
+          INVALID_TOKEN: new TRPCError({
+            code: "BAD_REQUEST",
+            message: "Token does not exist",
+          }),
+          EXPIRED_TOKEN: new TRPCError({
+            code: "BAD_REQUEST",
+            message: "Token has expired!",
+          }),
+          EMAIL_NOT_EXIST: new TRPCError({
+            code: "NOT_FOUND",
+            message: "Email does not exist!",
+          }),
+          UPDATE_FAILED: new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Failed to update user",
+          }),
+        };
+
+        const error = res.error ? errorMap[res.error] : undefined;
+
+        if (error) {
+          throw error;
+        } else {
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "An unexpected error occurred",
+          });
+        }
+      }
+
+      return {
+        success: true,
+        message: res.message ?? "Email verified successfully",
+      };
     }),
 });

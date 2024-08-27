@@ -71,15 +71,9 @@ export const userRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const { firstName, lastName, email, password } = input;
 
-      const user = await registerUser(
-        ctx,
-        firstName,
-        lastName,
-        email,
-        password,
-      );
+      const res = await registerUser(ctx, firstName, lastName, email, password);
 
-      if (!user) {
+      if (!res?.newUser) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Failed to create user",
@@ -89,13 +83,7 @@ export const userRouter = createTRPCRouter({
       return {
         success: true,
         message: "User created successfully",
-        user: {
-          id: user.id,
-          firstName: user.firstName,
-          lastName: user.lastName,
-          email: user.email,
-          role: user.role,
-        },
+        user: res.newUser,
       };
     }),
 

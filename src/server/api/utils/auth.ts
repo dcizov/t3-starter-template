@@ -2,12 +2,17 @@ import { randomUUID } from "crypto";
 import { hash, compare } from "bcrypt";
 import { accounts, sessions, users } from "@/server/db/schema";
 import { fromDate, getUserRole } from "@/lib/utils";
-import { generateVerificationToken } from "@/server/api/utils/token";
+import {
+  generateVerificationToken,
+  getVerificationTokenByToken,
+  deleteVerificationToken,
+} from "@/server/api/utils/token";
 import { sendEmail } from "@/lib/mail";
 import { type createTRPCContext } from "@/server/api/trpc";
 import { cookies } from "next/headers";
 import { findUserByEmail } from "@/server/api/utils/user";
 import { db } from "@/server/db";
+import { eq } from "drizzle-orm";
 
 type Context =
   ReturnType<typeof createTRPCContext> extends Promise<infer T> ? T : never;
@@ -60,12 +65,17 @@ export async function registerUser(
       providerAccountId: newUser.id,
     });
 
+    let verificationEmailSent = false;
     const verificationToken = await generateVerificationToken(ctx, email);
     if (verificationToken) {
-      await sendEmail(verificationToken.email, verificationToken.token);
+      const emailResult = await sendEmail(
+        verificationToken.email,
+        verificationToken.token,
+      );
+      verificationEmailSent = emailResult.success;
     }
 
-    return newUser;
+    return { newUser, verificationEmailSent };
   } else {
     return null;
   }
@@ -149,4 +159,53 @@ export async function createSession(ctx: Context | undefined, userId: string) {
   });
 
   return true;
+}
+
+/**
+ * Verifies an email token and updates the user's email verification status.
+ * @param ctx The database context (optional)
+ * @param token The verification token to verify
+ * @returns True if the token was successfully verified, otherwise false
+ */
+export async function verifyEmailToken(
+  ctx: Context | undefined,
+  token: string,
+) {
+  const dbInstance = ctx?.db ?? db;
+
+  const existingToken = await getVerificationTokenByToken(ctx, token);
+  console.log("Existing token: ", existingToken);
+
+  if (!existingToken) {
+    return { success: false, error: "INVALID_TOKEN" };
+  }
+
+  const hasExpired = new Date(existingToken.expires) < new Date();
+  console.log("Expired token: ", hasExpired);
+
+  if (hasExpired) {
+    await deleteVerificationToken(ctx, existingToken.id);
+    return { success: false, error: "EXPIRED_TOKEN" };
+  }
+
+  const existingUser = await findUserByEmail(ctx, existingToken.email);
+  console.log("Existing user: ", existingUser);
+
+  if (!existingUser) {
+    return { success: false, error: "EMAIL_NOT_EXIST" };
+  }
+
+  const [updatedUser] = await dbInstance
+    .update(users)
+    .set({ emailVerified: new Date(), email: existingToken.email })
+    .where(eq(users.email, existingToken.email))
+    .returning();
+
+  if (!updatedUser) {
+    return { success: false, error: "UPDATE_FAILED" };
+  }
+
+  await deleteVerificationToken(ctx, existingToken.id);
+
+  return { success: true, message: "Email verified!" };
 }
