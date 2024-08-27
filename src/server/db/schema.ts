@@ -130,3 +130,21 @@ export const credentialsVerificationTokens = createTable(
     compoundKey: primaryKey({ columns: [cvt.email, cvt.token] }),
   }),
 );
+
+export const passwordResetTokens = createTable(
+  "password_reset_token",
+  {
+    id: varchar("id", { length: 255 })
+      .notNull()
+      .$defaultFn(() => crypto.randomUUID()),
+    email: varchar("email", { length: 255 }).notNull(),
+    token: varchar("token", { length: 255 }).notNull(),
+    expires: timestamp("expires", {
+      mode: "date",
+      withTimezone: true,
+    }).notNull(),
+  },
+  (prt) => ({
+    compoundKey: primaryKey({ columns: [prt.email, prt.token] }),
+  }),
+);

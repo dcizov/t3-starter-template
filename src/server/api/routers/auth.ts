@@ -5,12 +5,16 @@ import {
   registerSchema,
   loginSchema,
   createSessionSchema,
+  resetPasswordSchema,
+  setNewPasswordSchema,
 } from "@/schemas/auth";
 import {
   registerUser,
   loginUser,
   createSession,
   verifyEmailToken,
+  resetPassword,
+  setNewPassword,
 } from "@/server/api/utils/auth";
 
 const verifyEmailSchema = z.object({
@@ -143,6 +147,88 @@ export const authRouter = createTRPCRouter({
       return {
         success: true,
         message: res.message ?? "Email verified successfully",
+      };
+    }),
+
+  resetPassword: publicProcedure
+    .input(resetPasswordSchema)
+    .mutation(async ({ ctx, input }) => {
+      const { email } = input;
+
+      const res = await resetPassword(ctx, email);
+
+      if (!res.success) {
+        const errorMap: Record<string, TRPCError> = {
+          EMAIL_NOT_FOUND: new TRPCError({
+            code: "NOT_FOUND",
+            message: "Email not found",
+          }),
+          EMAIL_SEND_FAILED: new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Failed to send password reset email",
+          }),
+        };
+
+        const error = res.error ? errorMap[res.error] : undefined;
+
+        if (error) {
+          throw error;
+        } else {
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "An unexpected error occurred",
+          });
+        }
+      }
+
+      return {
+        success: true,
+        message: "Password reset email sent successfully",
+      };
+    }),
+
+  setNewPassword: publicProcedure
+    .input(setNewPasswordSchema)
+    .mutation(async ({ ctx, input }) => {
+      const { password, token } = input;
+
+      const res = await setNewPassword(ctx, password, token);
+
+      if (!res.success) {
+        const errorMap: Record<string, TRPCError> = {
+          MISSING_TOKEN: new TRPCError({
+            code: "BAD_REQUEST",
+            message: "Token is missing",
+          }),
+          INVALID_TOKEN: new TRPCError({
+            code: "BAD_REQUEST",
+            message: "Invalid token",
+          }),
+          EXPIRED_TOKEN: new TRPCError({
+            code: "BAD_REQUEST",
+            message: "Token has expired",
+          }),
+          EMAIL_NOT_EXIST: new TRPCError({
+            code: "NOT_FOUND",
+            message: "Email not found",
+          }),
+        };
+
+        const error = res.error ? errorMap[res.error] : undefined;
+
+        if (error) {
+          throw error;
+        } else {
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "An unexpected error occurred",
+          });
+        }
+      }
+
+      return {
+        success: true,
+        message: res.message,
       };
     }),
 });

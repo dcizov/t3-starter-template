@@ -3,10 +3,21 @@ import { LoaderCircle } from "lucide-react";
 
 interface Props {
   isLoading: boolean;
-  typeSubmit: "signin" | "signup";
+  typeSubmit: "signin" | "signup" | "reset" | "set-password";
 }
 
 export default function AuthButton({ isLoading, typeSubmit }: Props) {
+  const buttonLabel =
+    typeSubmit === "signin"
+      ? "Sign in"
+      : typeSubmit === "signup"
+        ? "Create account"
+        : typeSubmit === "reset"
+          ? "Send reset email"
+          : typeSubmit === "set-password"
+            ? "Reset password"
+            : "Submit";
+
   return (
     <Button type="submit" className="w-full" disabled={isLoading}>
       {isLoading && (
@@ -14,7 +25,7 @@ export default function AuthButton({ isLoading, typeSubmit }: Props) {
           <LoaderCircle size={16} />
         </span>
       )}
-      {typeSubmit === "signin" ? "Sign in" : "Create Account"}
+      {buttonLabel}
     </Button>
   );
 }

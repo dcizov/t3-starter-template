@@ -6,13 +6,18 @@ import {
   generateVerificationToken,
   getVerificationTokenByToken,
   deleteVerificationToken,
-} from "@/server/api/utils/token";
-import { sendEmail } from "@/lib/mail";
+} from "@/server/api/utils/verification-token";
+import { sendPasswordResetEmail, sendVerificationEmail } from "@/lib/mail";
 import { type createTRPCContext } from "@/server/api/trpc";
 import { cookies } from "next/headers";
-import { findUserByEmail } from "@/server/api/utils/user";
+import { findUserByEmail, updateUserById } from "@/server/api/utils/user";
 import { db } from "@/server/db";
 import { eq } from "drizzle-orm";
+import {
+  generatePasswordResetToken,
+  getPasswordResetTokenByToken,
+  deletePasswordResetToken,
+} from "@/server/api/utils/password-reset-token";
 
 type Context =
   ReturnType<typeof createTRPCContext> extends Promise<infer T> ? T : never;
@@ -68,7 +73,7 @@ export async function registerUser(
     let verificationEmailSent = false;
     const verificationToken = await generateVerificationToken(ctx, email);
     if (verificationToken) {
-      const emailResult = await sendEmail(
+      const emailResult = await sendVerificationEmail(
         verificationToken.email,
         verificationToken.token,
       );
@@ -174,14 +179,12 @@ export async function verifyEmailToken(
   const dbInstance = ctx?.db ?? db;
 
   const existingToken = await getVerificationTokenByToken(ctx, token);
-  console.log("Existing token: ", existingToken);
 
   if (!existingToken) {
     return { success: false, error: "INVALID_TOKEN" };
   }
 
   const hasExpired = new Date(existingToken.expires) < new Date();
-  console.log("Expired token: ", hasExpired);
 
   if (hasExpired) {
     await deleteVerificationToken(ctx, existingToken.id);
@@ -189,7 +192,6 @@ export async function verifyEmailToken(
   }
 
   const existingUser = await findUserByEmail(ctx, existingToken.email);
-  console.log("Existing user: ", existingUser);
 
   if (!existingUser) {
     return { success: false, error: "EMAIL_NOT_EXIST" };
@@ -208,4 +210,74 @@ export async function verifyEmailToken(
   await deleteVerificationToken(ctx, existingToken.id);
 
   return { success: true, message: "Email verified!" };
+}
+
+/**
+ * Initiates the password reset process by sending a password reset email.
+ * @param ctx The database context (optional)
+ * @param email The user's email address
+ * @returns An object indicating success or failure with an appropriate message.
+ */
+export async function resetPassword(ctx: Context | undefined, email: string) {
+  const existingUser = await findUserByEmail(ctx, email);
+
+  if (!existingUser) {
+    return { success: false, error: "EMAIL_NOT_FOUND" };
+  }
+
+  let passwordResetEmailSent = false;
+  const passwordresetToken = await generatePasswordResetToken(ctx, email);
+  if (passwordresetToken) {
+    const emailResult = await sendPasswordResetEmail(
+      passwordresetToken.email,
+      passwordresetToken.token,
+    );
+    passwordResetEmailSent = emailResult.success;
+  }
+
+  return {
+    success: true,
+    message: "Reset email sent!",
+    passwordResetEmailSent,
+  };
+}
+
+/**
+ * Resets a user's password using a password reset token.
+ * @param ctx The database context (optional)
+ * @param token The password reset token to verify
+ * @param password The new password to set for the user
+ * @returns True if the password was successfully reset, otherwise false
+ */
+export async function setNewPassword(
+  ctx: Context | undefined,
+  password: string,
+  token: string | null,
+) {
+  if (!token) {
+    return { success: false, error: "MISSING_TOKEN" };
+  }
+
+  const existingToken = await getPasswordResetTokenByToken(ctx, token);
+  if (!existingToken) {
+    return { success: false, error: "INVALID_TOKEN" };
+  }
+
+  const hasExpired = new Date(existingToken.expires) < new Date();
+  if (hasExpired) {
+    return { success: false, error: "EXPIRED_TOKEN" };
+  }
+
+  const existingUser = await findUserByEmail(ctx, existingToken.email);
+  if (!existingUser) {
+    return { success: false, error: "EMAIL_NOT_EXIST" };
+  }
+
+  const hashedPassword = await hash(password, 10);
+
+  await updateUserById(ctx, existingUser.id, { password: hashedPassword });
+
+  await deletePasswordResetToken(ctx, existingToken.id);
+
+  return { success: true, message: "Password updated!" };
 }

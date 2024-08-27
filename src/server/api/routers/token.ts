@@ -1,17 +1,28 @@
 import { createTRPCRouter, publicProcedure } from "@/server/api/trpc";
 import { TRPCError } from "@trpc/server";
-import { z } from "zod";
 import {
   generateVerificationToken,
   getVerificationTokenById,
   getVerificationTokenByEmail,
   getVerificationTokenByToken,
   deleteVerificationToken,
-} from "@/server/api/utils/token";
+} from "@/server/api/utils/verification-token";
+import {
+  generatePasswordResetToken,
+  getPasswordResetTokenById,
+  getPasswordResetTokenByEmail,
+  getPasswordResetTokenByToken,
+  deletePasswordResetToken,
+} from "@/server/api/utils/password-reset-token";
+import {
+  tokenByEmailSchema,
+  tokenByIdSchema,
+  tokenByTokenSchema,
+} from "@/schemas/token";
 
 export const tokenRouter = createTRPCRouter({
   generateVerificationToken: publicProcedure
-    .input(z.object({ email: z.string().email() }))
+    .input(tokenByEmailSchema)
     .mutation(async ({ ctx, input }) => {
       const verificationToken = await generateVerificationToken(
         ctx,
@@ -33,7 +44,7 @@ export const tokenRouter = createTRPCRouter({
     }),
 
   getVerificationTokenById: publicProcedure
-    .input(z.object({ id: z.string().uuid() }))
+    .input(tokenByIdSchema)
     .query(async ({ ctx, input }) => {
       const verificationToken = await getVerificationTokenById(ctx, input.id);
 
@@ -48,7 +59,7 @@ export const tokenRouter = createTRPCRouter({
     }),
 
   getVerificationTokenByEmail: publicProcedure
-    .input(z.object({ email: z.string().email() }))
+    .input(tokenByEmailSchema)
     .query(async ({ ctx, input }) => {
       const verificationToken = await getVerificationTokenByEmail(
         ctx,
@@ -66,7 +77,7 @@ export const tokenRouter = createTRPCRouter({
     }),
 
   getVerificationTokenByToken: publicProcedure
-    .input(z.object({ token: z.string().uuid() }))
+    .input(tokenByTokenSchema)
     .query(async ({ ctx, input }) => {
       const verificationToken = await getVerificationTokenByToken(
         ctx,
@@ -84,7 +95,7 @@ export const tokenRouter = createTRPCRouter({
     }),
 
   deleteVerificationToken: publicProcedure
-    .input(z.object({ id: z.string().uuid() }))
+    .input(tokenByIdSchema)
     .mutation(async ({ ctx, input }) => {
       const success = await deleteVerificationToken(ctx, input.id);
 
@@ -98,6 +109,97 @@ export const tokenRouter = createTRPCRouter({
       return {
         success: true,
         message: "Verification token deleted successfully",
+      };
+    }),
+
+  generatePasswordResetToken: publicProcedure
+    .input(tokenByEmailSchema)
+    .mutation(async ({ ctx, input }) => {
+      const passwordResetToken = await generatePasswordResetToken(
+        ctx,
+        input.email,
+      );
+
+      if (!passwordResetToken) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to generate password reset token",
+        });
+      }
+
+      return {
+        success: true,
+        email: passwordResetToken.email,
+        token: passwordResetToken.token,
+      };
+    }),
+
+  getPasswordResetTokenById: publicProcedure
+    .input(tokenByIdSchema)
+    .query(async ({ ctx, input }) => {
+      const passwordResetToken = await getPasswordResetTokenById(ctx, input.id);
+
+      if (!passwordResetToken) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Password reset token not found",
+        });
+      }
+
+      return passwordResetToken;
+    }),
+
+  getPasswordResetTokenByEmail: publicProcedure
+    .input(tokenByEmailSchema)
+    .query(async ({ ctx, input }) => {
+      const passwordResetToken = await getPasswordResetTokenByEmail(
+        ctx,
+        input.email,
+      );
+
+      if (!passwordResetToken) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Password reset token not found",
+        });
+      }
+
+      return passwordResetToken;
+    }),
+
+  getPasswordResetTokenByToken: publicProcedure
+    .input(tokenByTokenSchema)
+    .query(async ({ ctx, input }) => {
+      const passwordResetToken = await getPasswordResetTokenByToken(
+        ctx,
+        input.token,
+      );
+
+      if (!passwordResetToken) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Password reset token not found",
+        });
+      }
+
+      return passwordResetToken;
+    }),
+
+  deletePasswordResetToken: publicProcedure
+    .input(tokenByIdSchema)
+    .mutation(async ({ ctx, input }) => {
+      const success = await deletePasswordResetToken(ctx, input.id);
+
+      if (!success) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Password reset token not found",
+        });
+      }
+
+      return {
+        success: true,
+        message: "Password reset token deleted successfully",
       };
     }),
 });

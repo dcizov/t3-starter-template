@@ -10,7 +10,13 @@ export const publicRoutes = ["/", "/verify-email"];
  * These routes will redirect logged in users to /settings
  * @type {string[]}
  */
-export const authRoutes = ["/signin", "/signup", "/error"];
+export const authRoutes = [
+  "/signin",
+  "/signup",
+  "/error",
+  "/reset-password",
+  "/set-new-password",
+];
 
 /**
  * An array of routes that are accessible to authenticated users

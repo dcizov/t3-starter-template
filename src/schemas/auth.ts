@@ -53,3 +53,18 @@ export const loginSchema = z.object({
 export const createSessionSchema = z.object({
   userId: z.string(),
 });
+
+export const resetPasswordSchema = z.object({
+  email: z
+    .string({ required_error: "Please enter your email" })
+    .email("Please enter a valid email address"),
+});
+
+export const setNewPasswordSchema = z.object({
+  token: z.string().uuid(),
+  password: z
+    .string({ required_error: "Password is required" })
+    .min(1, "Password is required")
+    .min(8, "Password must be more than 8 characters")
+    .max(32, "Password must be less than 32 characters"),
+});

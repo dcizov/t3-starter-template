@@ -19,64 +19,44 @@ import {
   FormLabel,
   FormMessage,
 } from "@/app/_components/ui/form";
-import { signIn } from "next-auth/react";
-import AuthButton from "@/app/_components/auth/auth-button";
-import SocialAuthButton from "@/app/_components/auth/social-auth-button"; // Import the new SocialAuthButton component
 import { Toaster } from "@/app/_components/ui/sonner";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { api } from "@/trpc/react";
-import { loginSchema } from "@/schemas/auth";
+import { resetPasswordSchema } from "@/schemas/auth";
+import AuthButton from "@/app/_components/auth/auth-button";
 
-type InputType = z.infer<typeof loginSchema>;
+type InputType = z.infer<typeof resetPasswordSchema>;
 
-export default function SignInForm() {
+export default function ResetPasswordForm() {
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
   const form = useForm<InputType>({
     defaultValues: {
       email: "",
-      password: "",
     },
-    resolver: zodResolver(loginSchema),
+    resolver: zodResolver(resetPasswordSchema),
   });
 
-  const { mutateAsync } = api.auth.login.useMutation({
-    onSuccess: async () => {
-      const response = await signIn("credentials", {
-        redirect: false,
-        email: form.getValues("email"),
-        password: form.getValues("password"),
-      });
-
-      if (!response?.ok) {
-        toast.error("Login failed", {
-          description: response?.error ?? "Invalid credentials",
-          duration: 5000,
-        });
-        return;
-      }
-
-      toast.success("Welcome back!", {
-        description: "Redirecting you to your dashboard!",
-        duration: 3000,
+  const { mutateAsync } = api.auth.resetPassword.useMutation({
+    onSuccess: () => {
+      toast.success("Reset email sent!", {
+        description: "Please check your email to reset your password.",
+        duration: 5000,
       });
 
       setTimeout(() => {
-        router.push("/dashboard");
+        router.push("/signin");
       }, 3000);
     },
     onError: (error) => {
       let errorMessage = "An unexpected error occurred";
 
       if (error.data?.code === "NOT_FOUND") {
-        errorMessage = "User does not exist";
-      } else if (error.data?.code === "UNAUTHORIZED") {
-        errorMessage =
-          error.message === "Email not verified"
-            ? "Please verify your email before logging in."
-            : "Please check your email and password.";
+        errorMessage = error.message;
+      } else if (error.data?.code === "INTERNAL_SERVER_ERROR") {
+        errorMessage = "Failed to send reset email";
       } else if (error.data?.zodError) {
         for (const [field, messages] of Object.entries(
           error.data.zodError.fieldErrors,
@@ -89,7 +69,7 @@ export default function SignInForm() {
         return;
       }
 
-      toast.error("Login failed", {
+      toast.error("Reset failed", {
         description: errorMessage,
         duration: 5000,
       });
@@ -101,7 +81,7 @@ export default function SignInForm() {
     try {
       await mutateAsync(data);
     } catch (error) {
-      console.error("Login failed:", error);
+      console.error("Reset failed:", error);
     } finally {
       setIsLoading(false);
     }
@@ -125,10 +105,10 @@ export default function SignInForm() {
           <div className="w-full max-w-[350px] space-y-6">
             <CardHeader className="space-y-1 text-center">
               <CardTitle className="text-2xl font-bold sm:text-3xl">
-                Sign in to your account
+                Forgot your password?
               </CardTitle>
               <CardDescription className="text-sm text-muted-foreground sm:text-base">
-                Enter your email below to login to your account
+                Enter your email below to reset your password
               </CardDescription>
             </CardHeader>
             <div className="space-y-4">
@@ -151,49 +131,15 @@ export default function SignInForm() {
                   )}
                 />
               </div>
-              <div className="space-y-2">
-                <FormField
-                  control={form.control}
-                  name="password"
-                  render={({ field }) => (
-                    <FormItem>
-                      <div className="flex items-center justify-between">
-                        <FormLabel>Password</FormLabel>
-                        <Link
-                          href="/reset-password"
-                          className="text-xs underline sm:text-sm"
-                        >
-                          Forgot your password?
-                        </Link>
-                      </div>
-                      <FormControl>
-                        <Input
-                          placeholder="Password"
-                          type="password"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
               <div className="space-y-4">
                 <div className="space-y-2">
-                  <AuthButton isLoading={isLoading} typeSubmit="signin" />
-                </div>
-                <div className="space-y-2">
-                  <SocialAuthButton typeSubmit="signin" provider="google" />
-                </div>
-                <div className="space-y-2">
-                  <SocialAuthButton typeSubmit="signin" provider="github" />
+                  <AuthButton isLoading={isLoading} typeSubmit="reset" />
                 </div>
               </div>
             </div>
             <div className="text-center text-sm">
-              Don&apos;t have an account?{" "}
-              <Link href="/signup" className="underline">
-                Sign up
+              <Link href="/signin" className="underline">
+                Back to sign in
               </Link>
             </div>
           </div>
