@@ -237,26 +237,20 @@ export default function SignInForm() {
                     typeSubmit="signin"
                   />
                 </div>
-                {!showTwoFactor && (
-                  <>
-                    <div className="space-y-2">
-                      <SocialAuthButton typeSubmit="signin" provider="google" />
-                    </div>
-                    <div className="space-y-2">
-                      <SocialAuthButton typeSubmit="signin" provider="github" />
-                    </div>
-                  </>
-                )}
+                <div className="space-y-2">
+                  <SocialAuthButton typeSubmit="signin" provider="google" />
+                </div>
+                <div className="space-y-2">
+                  <SocialAuthButton typeSubmit="signin" provider="github" />
+                </div>
               </div>
             </div>
-            {!showTwoFactor && (
-              <div className="text-center text-sm">
-                Don&apos;t have an account?{" "}
-                <Link href="/signup" className="underline">
-                  Sign up
-                </Link>
-              </div>
-            )}
+            <div className="text-center text-sm">
+              Don&apos;t have an account?{" "}
+              <Link href="/signup" className="underline">
+                Sign up
+              </Link>
+            </div>
           </div>
         </form>
       </Form>
