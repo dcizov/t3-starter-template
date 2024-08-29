@@ -16,6 +16,14 @@ export async function middleware(req: NextRequest) {
     throw new Error("AUTH_URL is not defined in the environment variables");
   }
 
+  const isPublicRoute = publicRoutes.includes(nextUrl.pathname);
+  const isApiAuthRoute = nextUrl.pathname.startsWith(apiAuthPrefix);
+  const isTrpcRoute = nextUrl.pathname.startsWith(trpcPrefix);
+
+  if (isPublicRoute || isApiAuthRoute || isTrpcRoute) {
+    return NextResponse.next();
+  }
+
   const resSession = await fetch(`${AUTH_URL}/api/auth/session`, {
     method: "GET",
     headers: {
@@ -33,23 +41,14 @@ export async function middleware(req: NextRequest) {
 
   const isAuthorized = session?.user?.id != null;
 
-  const isApiAuthRoute = nextUrl.pathname.startsWith(apiAuthPrefix);
-  const isTrpcRoute = nextUrl.pathname.startsWith(trpcPrefix);
-  const isPublicRoute = publicRoutes.includes(nextUrl.pathname);
-  const isAuthRoute = authRoutes.includes(nextUrl.pathname);
-
-  if (isApiAuthRoute || isTrpcRoute) {
-    return NextResponse.next();
-  }
-
-  if (isAuthRoute) {
+  if (authRoutes.includes(nextUrl.pathname)) {
     if (isAuthorized) {
       return NextResponse.redirect(new URL(DEFAULT_LOGIN_REDIRECT, nextUrl));
     }
     return NextResponse.next();
   }
 
-  if (!isAuthorized && !isPublicRoute) {
+  if (!isAuthorized) {
     const callbackUrl = nextUrl.pathname + nextUrl.search;
     const encodedCallbackUrl = encodeURIComponent(callbackUrl);
     return NextResponse.redirect(
