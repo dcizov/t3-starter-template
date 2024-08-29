@@ -17,6 +17,10 @@ type Context =
  */
 export async function createSession(ctx: Context | undefined, userId: string) {
   const dbInstance = ctx?.db ?? db;
+
+  // Check for an existing session for the user and delete it
+  await dbInstance.delete(sessions).where(eq(sessions.userId, userId));
+
   const sessionToken = randomUUID();
   const sessionExpiry = fromDate(60 * 60 * 24 * 30);
 
@@ -66,14 +70,18 @@ export async function deleteSession(
     return false;
   }
 
-  cookies().set({
-    name: "authjs.session-token",
-    value: "",
-    expires: new Date(0),
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
-  });
+  const cookieStore = cookies();
+  const existingCookie = cookieStore.get("authjs.session-token");
+  if (existingCookie) {
+    cookieStore.set({
+      name: "authjs.session-token",
+      value: "",
+      expires: new Date(0),
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+    });
+  }
 
   return true;
 }
