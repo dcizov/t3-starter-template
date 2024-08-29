@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-import SettingsPage from "@/app/_components/dashboard/settings";
+import SettingsForm from "@/app/_components/dashboard/settings/settings-form";
 import { ContentLayout } from "@/app/_components/dashboard/content-layout";
 import {
   Breadcrumb,
@@ -36,7 +36,7 @@ export default async function DashboardPage() {
           </BreadcrumbItem>
         </BreadcrumbList>
       </Breadcrumb>
-      <SettingsPage />
+      <SettingsForm />
     </ContentLayout>
   );
 }
