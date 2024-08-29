@@ -2,7 +2,7 @@ import {
   deleteTwoFactorToken,
   generateTwoFactorToken,
   getTwoFactorTokenByEmail,
-} from "@/server/api/utils/2fa-token";
+} from "@/server/api/utils/2fa/2fa-token";
 import { sendTwoFactorEmail } from "@/lib/mail";
 import { type createTRPCContext } from "@/server/api/trpc";
 import {

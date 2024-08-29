@@ -1,15 +1,13 @@
-import { randomUUID } from "crypto";
 import { hash, compare } from "bcrypt";
-import { accounts, sessions, users } from "@/server/db/schema";
-import { fromDate, getUserRole } from "@/lib/utils";
+import { accounts, users } from "@/server/db/schema";
+import { getUserRole } from "@/lib/utils";
 import {
   generateVerificationToken,
   getVerificationTokenByToken,
   deleteVerificationToken,
-} from "@/server/api/utils/verification-token";
+} from "@/server/api/utils/auth/verification-token";
 import { sendPasswordResetEmail, sendVerificationEmail } from "@/lib/mail";
 import { type createTRPCContext } from "@/server/api/trpc";
-import { cookies } from "next/headers";
 import { findUserByEmail, updateUserById } from "@/server/api/utils/user";
 import { db } from "@/server/db";
 import { eq } from "drizzle-orm";
@@ -17,7 +15,7 @@ import {
   generatePasswordResetToken,
   getPasswordResetTokenByToken,
   deletePasswordResetToken,
-} from "@/server/api/utils/password-reset-token";
+} from "@/server/api/utils/auth/password-reset-token";
 
 type Context =
   ReturnType<typeof createTRPCContext> extends Promise<infer T> ? T : never;
@@ -125,42 +123,6 @@ export async function loginUser(
       isTwoFactorEnabled: existingUser.isTwoFactorEnabled,
     },
   };
-}
-
-/**
- * Creates a new session for the user and sets a session cookie.
- * @param ctx The database context (optional)
- * @param userId The ID of the user to create a session for
- * @returns True if the session was successfully created, otherwise false
- */
-export async function createSession(ctx: Context | undefined, userId: string) {
-  const dbInstance = ctx?.db ?? db;
-  const sessionToken = randomUUID();
-  const sessionExpiry = fromDate(60 * 60 * 24 * 30);
-
-  const [createdSession] = await dbInstance
-    .insert(sessions)
-    .values({
-      sessionToken,
-      userId,
-      expires: sessionExpiry,
-    })
-    .returning();
-
-  if (!createdSession) {
-    return false;
-  }
-
-  cookies().set({
-    name: "authjs.session-token",
-    value: sessionToken,
-    expires: sessionExpiry,
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
-  });
-
-  return true;
 }
 
 /**

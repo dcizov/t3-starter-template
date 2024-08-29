@@ -15,7 +15,7 @@ import {
   TooltipContent,
   TooltipProvider,
 } from "@/app/_components/ui/tooltip";
-import { signOut } from "next-auth/react";
+import { signOut } from "@/actions/sign-out";
 
 interface MenuProps {
   isOpen: boolean | undefined;
@@ -109,9 +109,7 @@ export function Menu({ isOpen }: MenuProps) {
               <Tooltip delayDuration={100}>
                 <TooltipTrigger asChild>
                   <Button
-                    onClick={() =>
-                      signOut({ callbackUrl: "/", redirect: true })
-                    }
+                    onClick={() => signOut()}
                     variant="outline"
                     className="mt-5 h-10 w-full justify-center"
                   >

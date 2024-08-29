@@ -4,19 +4,17 @@ import { z } from "zod";
 import {
   registerSchema,
   loginSchema,
-  createSessionSchema,
   resetPasswordSchema,
   setNewPasswordSchema,
 } from "@/schemas/auth";
 import {
   registerUser,
   loginUser,
-  createSession,
   verifyEmailToken,
   resetPassword,
   setNewPassword,
-} from "@/server/api/utils/auth";
-import { handleTwoFactorAuthentication } from "../utils/2fa";
+} from "@/server/api/utils/auth/auth";
+import { handleTwoFactorAuthentication } from "../utils/2fa/2fa";
 
 const verifyEmailSchema = z.object({
   token: z.string().nonempty("Token is required"),
@@ -105,21 +103,6 @@ export const authRouter = createTRPCRouter({
       twoFactor: twoFactorResponse.twoFactor,
     };
   }),
-
-  createSession: publicProcedure
-    .input(createSessionSchema)
-    .mutation(async ({ ctx, input }) => {
-      const success = await createSession(ctx, input.userId);
-
-      if (!success) {
-        throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: "Failed to create session",
-        });
-      }
-
-      return { success: true };
-    }),
 
   verifyEmail: publicProcedure
     .input(verifyEmailSchema)

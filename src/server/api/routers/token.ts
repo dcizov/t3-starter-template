@@ -6,14 +6,14 @@ import {
   getVerificationTokenByEmail,
   getVerificationTokenByToken,
   deleteVerificationToken,
-} from "@/server/api/utils/verification-token";
+} from "@/server/api/utils/auth/verification-token";
 import {
   generatePasswordResetToken,
   getPasswordResetTokenById,
   getPasswordResetTokenByEmail,
   getPasswordResetTokenByToken,
   deletePasswordResetToken,
-} from "@/server/api/utils/password-reset-token";
+} from "@/server/api/utils/auth/password-reset-token";
 import {
   tokenByEmailSchema,
   tokenByIdSchema,

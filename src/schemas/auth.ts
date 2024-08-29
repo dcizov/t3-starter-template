@@ -55,10 +55,6 @@ export const loginSchema = z.object({
     .optional(),
 });
 
-export const createSessionSchema = z.object({
-  userId: z.string(),
-});
-
 export const resetPasswordSchema = z.object({
   email: z
     .string({ required_error: "Please enter your email" })

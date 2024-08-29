@@ -1,6 +1,7 @@
 import { authRouter } from "./routers/auth";
 import { userRouter } from "./routers/user";
 import { tokenRouter } from "./routers/token";
+import { sessionRouter } from "./routers/session";
 import { createCallerFactory, createTRPCRouter } from "@/server/api/trpc";
 
 /**
@@ -11,6 +12,7 @@ import { createCallerFactory, createTRPCRouter } from "@/server/api/trpc";
 export const appRouter = createTRPCRouter({
   auth: authRouter,
   user: userRouter,
+  session: sessionRouter,
   token: tokenRouter,
 });
 

@@ -3,7 +3,7 @@ import Google, { type GoogleProfile } from "next-auth/providers/google";
 import Github, { type GitHubProfile } from "next-auth/providers/github";
 import Credentials from "next-auth/providers/credentials";
 import { getUserRole } from "@/lib/utils";
-import { loginUser } from "@/server/api/utils/auth";
+import { loginUser } from "@/server/api/utils/auth/auth";
 
 const authConfig: NextAuthConfig = {
   providers: [

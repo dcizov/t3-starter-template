@@ -25,7 +25,7 @@ import {
   DropdownMenuTrigger,
 } from "@/app/_components/ui/dropdown-menu";
 import LetteredAvatar from "@/app/_components/common/lettered-avatar";
-import { signOut } from "next-auth/react";
+import { signOut } from "@/actions/sign-out";
 import type { Session } from "next-auth";
 
 interface UserNavProps {
@@ -95,7 +95,7 @@ export const UserNav: React.FC<UserNavProps> = ({ session }) => {
         <DropdownMenuSeparator />
         <DropdownMenuItem
           className="hover:cursor-pointer"
-          onClick={() => signOut({ callbackUrl: "/", redirect: true })}
+          onClick={() => signOut()}
         >
           <LogOut className="mr-3 h-4 w-4 text-muted-foreground" />
           Sign out
