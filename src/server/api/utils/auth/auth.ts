@@ -104,24 +104,13 @@ export async function loginUser(
     return { success: false, error: "EMAIL_NOT_VERIFIED" };
   }
 
-  const isPasswordValid = await compare(password, existingUser.password!);
-
-  if (!isPasswordValid) {
+  if (!(await compare(password, existingUser.password!))) {
     return { success: false, error: "INVALID_CREDENTIALS" };
   }
 
   return {
     success: true,
-    user: {
-      id: existingUser.id,
-      firstName: existingUser.firstName,
-      lastName: existingUser.lastName,
-      name: existingUser.name,
-      email: existingUser.email,
-      role: existingUser.role,
-      emailVerified: existingUser.emailVerified,
-      isTwoFactorEnabled: existingUser.isTwoFactorEnabled,
-    },
+    user: existingUser,
   };
 }
 

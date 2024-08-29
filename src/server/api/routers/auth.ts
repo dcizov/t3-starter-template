@@ -81,7 +81,9 @@ export const authRouter = createTRPCRouter({
       }
     }
 
-    if (!res.user) {
+    const { user } = res;
+
+    if (!user) {
       throw new TRPCError({
         code: "INTERNAL_SERVER_ERROR",
         message: "User information is missing",
@@ -90,16 +92,16 @@ export const authRouter = createTRPCRouter({
 
     const twoFactorResponse = await handleTwoFactorAuthentication(
       ctx,
-      res.user.id,
-      res.user.email,
-      res.user.isTwoFactorEnabled,
+      user.id,
+      user.email,
+      user.isTwoFactorEnabled,
       code,
     );
 
     return {
       success: true,
       message: "Login successful",
-      user: res.user,
+      user,
       twoFactor: twoFactorResponse.twoFactor,
     };
   }),

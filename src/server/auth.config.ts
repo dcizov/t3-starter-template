@@ -4,6 +4,7 @@ import Github, { type GitHubProfile } from "next-auth/providers/github";
 import Credentials from "next-auth/providers/credentials";
 import { getUserRole } from "@/lib/utils";
 import { loginUser } from "@/server/api/utils/auth/auth";
+import { loginSchema } from "@/schemas/auth";
 
 const authConfig: NextAuthConfig = {
   providers: [
@@ -41,20 +42,16 @@ const authConfig: NextAuthConfig = {
         password: { label: "Password", type: "password" },
       },
       authorize: async (credentials) => {
-        if (!credentials?.email || !credentials.password) return null;
+        const { success, data } = loginSchema.safeParse(credentials);
+
+        if (!success || !data.email || !data.password) return null;
 
         try {
-          const result = await loginUser(
-            undefined,
-            credentials.email as string,
-            credentials.password as string,
-          );
+          const result = await loginUser(undefined, data.email, data.password);
 
-          if (result.success && result.user) {
-            return result.user.emailVerified ? result.user : null;
-          } else {
-            return null;
-          }
+          return result.success && result.user?.emailVerified
+            ? result.user
+            : null;
         } catch (error) {
           console.error("Error authorizing credentials:", error);
           return null;

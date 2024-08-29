@@ -30,47 +30,44 @@ export async function handleTwoFactorAuthentication(
   isTwoFactorEnabled: boolean,
   code?: string,
 ) {
-  if (isTwoFactorEnabled && email) {
-    if (code) {
-      const twoFactorToken = await getTwoFactorTokenByEmail(ctx, email);
-
-      if (!twoFactorToken) {
-        return { error: "TOKEN_NOT_FOUND" };
-      }
-
-      if (twoFactorToken.token !== code) {
-        return { error: "INVALID_TOKEN" };
-      }
-
-      const hasExpired = new Date(twoFactorToken.expires) < new Date();
-
-      if (hasExpired) {
-        return { error: "TOKEN_EXPIRED" };
-      }
-
-      await deleteTwoFactorToken(ctx, twoFactorToken.id);
-
-      const existingConfirmation = await getTwoFactorConfirmationByUserId(
-        ctx,
-        userId,
-      );
-
-      if (existingConfirmation) {
-        await deleteTwoFactorConfirmation(ctx, existingConfirmation.id);
-      }
-
-      await generateTwoFactorConfirmation(ctx, userId);
-    } else {
-      const twoFactorToken = await generateTwoFactorToken(ctx, email);
-
-      if (twoFactorToken) {
-        await sendTwoFactorEmail(twoFactorToken.email, twoFactorToken.token);
-        return { twoFactor: true };
-      } else {
-        throw new Error("Failed to generate 2FA token");
-      }
-    }
+  if (!isTwoFactorEnabled || !email) {
+    return { twoFactor: false };
   }
 
-  return { twoFactor: false };
+  if (code) {
+    const twoFactorToken = await getTwoFactorTokenByEmail(ctx, email);
+
+    if (!twoFactorToken) {
+      return { error: "TOKEN_NOT_FOUND" };
+    }
+
+    if (twoFactorToken.token !== code) {
+      return { error: "INVALID_TOKEN" };
+    }
+
+    if (new Date(twoFactorToken.expires) < new Date()) {
+      return { error: "TOKEN_EXPIRED" };
+    }
+
+    await deleteTwoFactorToken(ctx, twoFactorToken.id);
+
+    const existingConfirmation = await getTwoFactorConfirmationByUserId(
+      ctx,
+      userId,
+    );
+    if (existingConfirmation) {
+      await deleteTwoFactorConfirmation(ctx, existingConfirmation.id);
+    }
+
+    await generateTwoFactorConfirmation(ctx, userId);
+    return { twoFactor: false };
+  }
+
+  const twoFactorToken = await generateTwoFactorToken(ctx, email);
+  if (!twoFactorToken) {
+    throw new Error("Failed to generate 2FA token");
+  }
+
+  await sendTwoFactorEmail(twoFactorToken.email, twoFactorToken.token);
+  return { twoFactor: true };
 }
