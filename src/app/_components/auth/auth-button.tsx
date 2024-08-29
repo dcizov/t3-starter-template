@@ -3,12 +3,18 @@ import { LoaderCircle } from "lucide-react";
 
 interface Props {
   isLoading: boolean;
+  showTwoFactor?: boolean;
   typeSubmit: "signin" | "signup" | "reset" | "set-password";
 }
 
-export default function AuthButton({ isLoading, typeSubmit }: Props) {
-  const buttonLabel =
-    typeSubmit === "signin"
+export default function AuthButton({
+  isLoading,
+  showTwoFactor = false,
+  typeSubmit,
+}: Props) {
+  const buttonLabel = showTwoFactor
+    ? "Confirm"
+    : typeSubmit === "signin"
       ? "Sign in"
       : typeSubmit === "signup"
         ? "Create account"

@@ -83,3 +83,20 @@ export async function sendPasswordResetEmail(email: string, token: string) {
 
   return sendEmail(email, "Password Reset Request", htmlContent);
 }
+
+/**
+ * Sends a 2FA authentication (2FA) email to the specified email address.
+ * @param email The recipient's email address.
+ * @param token The 2FA token to include in the email.
+ * @returns An object indicating success or failure of the email sending operation.
+ */
+export async function sendTwoFactorEmail(email: string, token: string) {
+  const htmlContent = `
+    <p>Hello,</p>
+    <p>Your 2FA code is:</p>
+    <h2>${token}</h2>
+    <p>If you did not request this, please secure your account immediately.</p>
+  `;
+
+  return sendEmail(email, "Your 2FA Code", htmlContent);
+}

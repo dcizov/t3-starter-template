@@ -16,6 +16,7 @@ import {
   resetPassword,
   setNewPassword,
 } from "@/server/api/utils/auth";
+import { handleTwoFactorAuthentication } from "../utils/2fa";
 
 const verifyEmailSchema = z.object({
   token: z.string().nonempty("Token is required"),
@@ -50,7 +51,7 @@ export const authRouter = createTRPCRouter({
     }),
 
   login: publicProcedure.input(loginSchema).mutation(async ({ ctx, input }) => {
-    const { email, password } = input;
+    const { email, password, code } = input;
 
     const res = await loginUser(ctx, email, password);
 
@@ -82,10 +83,26 @@ export const authRouter = createTRPCRouter({
       }
     }
 
+    if (!res.user) {
+      throw new TRPCError({
+        code: "INTERNAL_SERVER_ERROR",
+        message: "User information is missing",
+      });
+    }
+
+    const twoFactorResponse = await handleTwoFactorAuthentication(
+      ctx,
+      res.user.id,
+      res.user.email,
+      res.user.isTwoFactorEnabled,
+      code,
+    );
+
     return {
       success: true,
       message: "Login successful",
       user: res.user,
+      twoFactor: twoFactorResponse.twoFactor,
     };
   }),
 
@@ -110,7 +127,6 @@ export const authRouter = createTRPCRouter({
       const { token } = input;
 
       const res = await verifyEmailToken(ctx, token);
-      console.log(res);
 
       if (!res.success) {
         const errorMap: Record<string, TRPCError> = {

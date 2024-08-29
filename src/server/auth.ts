@@ -13,6 +13,10 @@ import { encode, decode } from "next-auth/jwt";
 import { updateUserById, findUserById } from "@/server/api/utils/user";
 import { createSession } from "@/server/api/utils/auth";
 import authConfig from "@/server/auth.config";
+import {
+  deleteTwoFactorConfirmation,
+  getTwoFactorConfirmationByUserId,
+} from "@/server/api/utils/2fa-confirmation";
 
 /**
  * Module augmentation for `next-auth` types. Allows us to add custom properties to the `session`
@@ -53,27 +57,36 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
       };
     },
     signIn: async ({ user, account }) => {
-      if (account?.provider === "credentials") {
-        if (user.id) {
-          try {
-            const sessionCreated = await createSession(undefined, user.id);
+      if (account?.provider === "credentials" && user?.id) {
+        try {
+          const existingUser = await findUserById(undefined, user.id);
 
-            if (!sessionCreated) {
-              return false;
-            }
+          if (!existingUser?.emailVerified) return false;
 
-            return true;
-          } catch (error) {
-            console.error("Error creating session:", error);
-            return false;
+          if (existingUser.isTwoFactorEnabled) {
+            const twoFactorConfirmation =
+              await getTwoFactorConfirmationByUserId(
+                undefined,
+                existingUser.id,
+              );
+
+            if (!twoFactorConfirmation) return false;
+
+            await deleteTwoFactorConfirmation(
+              undefined,
+              twoFactorConfirmation.id,
+            );
           }
-        }
 
-        const existingUser = await findUserById(undefined, user.id!);
-        if (!existingUser?.emailVerified) return false;
+          const sessionCreated = await createSession(undefined, user.id);
+          return sessionCreated || false;
+        } catch (error) {
+          console.error("Error during signIn:", error);
+          return false;
+        }
       }
 
-      return true;
+      return false;
     },
   },
   adapter: DrizzleAdapter(db, {

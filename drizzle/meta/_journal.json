@@ -1,68 +1,12 @@
 {
-  "version": "6",
+  "version": "7",
   "dialect": "postgresql",
   "entries": [
     {
       "idx": 0,
-      "version": "6",
-      "when": 1721864290189,
-      "tag": "0000_ordinary_wonder_man",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "6",
-      "when": 1723472360959,
-      "tag": "0001_nebulous_hitman",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "6",
-      "when": 1723538647649,
-      "tag": "0002_mushy_speed_demon",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "6",
-      "when": 1724156043162,
-      "tag": "0003_orange_deathstrike",
-      "breakpoints": true
-    },
-    {
-      "idx": 4,
-      "version": "6",
-      "when": 1724156203476,
-      "tag": "0004_slimy_tyrannus",
-      "breakpoints": true
-    },
-    {
-      "idx": 5,
-      "version": "6",
-      "when": 1724165665258,
-      "tag": "0005_concerned_lord_tyger",
-      "breakpoints": true
-    },
-    {
-      "idx": 6,
-      "version": "6",
-      "when": 1724166398171,
-      "tag": "0006_naive_carnage",
-      "breakpoints": true
-    },
-    {
-      "idx": 7,
-      "version": "6",
-      "when": 1724623451028,
-      "tag": "0007_blushing_cardiac",
-      "breakpoints": true
-    },
-    {
-      "idx": 8,
-      "version": "6",
-      "when": 1724683909182,
-      "tag": "0008_classy_dormammu",
+      "version": "7",
+      "when": 1724855644225,
+      "tag": "0000_perpetual_inhumans",
       "breakpoints": true
     }
   ]

@@ -39,7 +39,6 @@ export async function registerUser(
   password: string,
 ) {
   const dbInstance = ctx?.db ?? db;
-
   const existingUser = await findUserByEmail(ctx, email);
 
   if (existingUser) {
@@ -62,28 +61,26 @@ export async function registerUser(
     })
     .returning();
 
-  if (newUser) {
-    await dbInstance.insert(accounts).values({
-      userId: newUser.id,
-      type: "email",
-      provider: "credentials",
-      providerAccountId: newUser.id,
-    });
-
-    let verificationEmailSent = false;
-    const verificationToken = await generateVerificationToken(ctx, email);
-    if (verificationToken) {
-      const emailResult = await sendVerificationEmail(
-        verificationToken.email,
-        verificationToken.token,
-      );
-      verificationEmailSent = emailResult.success;
-    }
-
-    return { newUser, verificationEmailSent };
-  } else {
+  if (!newUser) {
     return null;
   }
+
+  await dbInstance.insert(accounts).values({
+    userId: newUser.id,
+    type: "email",
+    provider: "credentials",
+    providerAccountId: newUser.id,
+  });
+
+  const verificationToken = await generateVerificationToken(ctx, email);
+  const emailResult = verificationToken
+    ? await sendVerificationEmail(
+        verificationToken.email,
+        verificationToken.token,
+      )
+    : { success: false };
+
+  return { newUser, verificationEmailSent: emailResult.success };
 }
 
 /**
@@ -92,24 +89,24 @@ export async function registerUser(
  * @param ctx The database context (optional)
  * @param email The user's email address
  * @param password The password to verify
- * @returns An object with either user data or error information.
+ * @returns An object with either user data and a success flag, or error information.
  */
 export async function loginUser(
   ctx: Context | undefined,
   email: string,
   password: string,
 ) {
-  const user = await findUserByEmail(ctx, email);
+  const existingUser = await findUserByEmail(ctx, email);
 
-  if (!user) {
+  if (!existingUser) {
     return { success: false, error: "USER_NOT_FOUND" };
   }
 
-  if (!user.emailVerified) {
+  if (!existingUser.emailVerified) {
     return { success: false, error: "EMAIL_NOT_VERIFIED" };
   }
 
-  const isPasswordValid = await compare(password, user.password!);
+  const isPasswordValid = await compare(password, existingUser.password!);
 
   if (!isPasswordValid) {
     return { success: false, error: "INVALID_CREDENTIALS" };
@@ -118,13 +115,14 @@ export async function loginUser(
   return {
     success: true,
     user: {
-      id: user.id,
-      firstName: user.firstName,
-      lastName: user.lastName,
-      name: user.name,
-      email: user.email,
-      role: user.role,
-      emailVerified: user.emailVerified,
+      id: existingUser.id,
+      firstName: existingUser.firstName,
+      lastName: existingUser.lastName,
+      name: existingUser.name,
+      email: existingUser.email,
+      role: existingUser.role,
+      emailVerified: existingUser.emailVerified,
+      isTwoFactorEnabled: existingUser.isTwoFactorEnabled,
     },
   };
 }
@@ -144,7 +142,7 @@ export async function createSession(ctx: Context | undefined, userId: string) {
     .insert(sessions)
     .values({
       sessionToken,
-      userId: userId,
+      userId,
       expires: sessionExpiry,
     })
     .returning();
@@ -153,8 +151,7 @@ export async function createSession(ctx: Context | undefined, userId: string) {
     return false;
   }
 
-  const cookieStore = cookies();
-  cookieStore.set({
+  cookies().set({
     name: "authjs.session-token",
     value: sessionToken,
     expires: sessionExpiry,
@@ -177,24 +174,15 @@ export async function verifyEmailToken(
   token: string,
 ) {
   const dbInstance = ctx?.db ?? db;
-
   const existingToken = await getVerificationTokenByToken(ctx, token);
 
   if (!existingToken) {
     return { success: false, error: "INVALID_TOKEN" };
   }
 
-  const hasExpired = new Date(existingToken.expires) < new Date();
-
-  if (hasExpired) {
+  if (new Date(existingToken.expires) < new Date()) {
     await deleteVerificationToken(ctx, existingToken.id);
     return { success: false, error: "EXPIRED_TOKEN" };
-  }
-
-  const existingUser = await findUserByEmail(ctx, existingToken.email);
-
-  if (!existingUser) {
-    return { success: false, error: "EMAIL_NOT_EXIST" };
   }
 
   const [updatedUser] = await dbInstance
@@ -225,20 +213,18 @@ export async function resetPassword(ctx: Context | undefined, email: string) {
     return { success: false, error: "EMAIL_NOT_FOUND" };
   }
 
-  let passwordResetEmailSent = false;
   const passwordresetToken = await generatePasswordResetToken(ctx, email);
-  if (passwordresetToken) {
-    const emailResult = await sendPasswordResetEmail(
-      passwordresetToken.email,
-      passwordresetToken.token,
-    );
-    passwordResetEmailSent = emailResult.success;
-  }
+  const emailResult = passwordresetToken
+    ? await sendPasswordResetEmail(
+        passwordresetToken.email,
+        passwordresetToken.token,
+      )
+    : { success: false };
 
   return {
     success: true,
     message: "Reset email sent!",
-    passwordResetEmailSent,
+    passwordResetEmailSent: emailResult.success,
   };
 }
 
@@ -259,24 +245,23 @@ export async function setNewPassword(
   }
 
   const existingToken = await getPasswordResetTokenByToken(ctx, token);
+
   if (!existingToken) {
     return { success: false, error: "INVALID_TOKEN" };
   }
 
-  const hasExpired = new Date(existingToken.expires) < new Date();
-  if (hasExpired) {
+  if (new Date(existingToken.expires) < new Date()) {
     return { success: false, error: "EXPIRED_TOKEN" };
   }
 
   const existingUser = await findUserByEmail(ctx, existingToken.email);
+
   if (!existingUser) {
     return { success: false, error: "EMAIL_NOT_EXIST" };
   }
 
   const hashedPassword = await hash(password, 10);
-
   await updateUserById(ctx, existingUser.id, { password: hashedPassword });
-
   await deletePasswordResetToken(ctx, existingToken.id);
 
   return { success: true, message: "Password updated!" };

@@ -1,1 +1,0 @@
-ALTER TABLE "t3-starter-template_user" ALTER COLUMN "role" DROP DEFAULT;

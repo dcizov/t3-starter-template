@@ -55,8 +55,6 @@ export default function SetNewPasswordForm() {
     onError: (error) => {
       let errorMessage = "An unexpected error occurred";
 
-      console.log(error);
-
       if (error.data?.code === "BAD_REQUEST") {
         errorMessage = error.message;
       } else if (error.data?.code === "NOT_FOUND") {
@@ -82,7 +80,6 @@ export default function SetNewPasswordForm() {
 
   const onSubmit = async (data: InputType) => {
     setIsLoading(true);
-    console.log(data);
     try {
       await mutateAsync(data);
     } catch (error) {

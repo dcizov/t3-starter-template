@@ -7,6 +7,8 @@ import {
   text,
   timestamp,
   varchar,
+  unique,
+  boolean,
 } from "drizzle-orm/pg-core";
 import { type AdapterAccount } from "next-auth/adapters";
 
@@ -36,10 +38,15 @@ export const users = createTable("user", {
   image: varchar("image", { length: 255 }),
   password: varchar("password", { length: 255 }),
   role: varchar("role", { length: 255 }).notNull(),
+  isTwoFactorEnabled: boolean("is_two_factor_enabled").notNull().default(false),
 });
 
-export const usersRelations = relations(users, ({ many }) => ({
+export const usersRelations = relations(users, ({ many, one }) => ({
   accounts: many(accounts),
+  twoFactorConfirmation: one(twoFactorConfirmations, {
+    fields: [users.id],
+    references: [twoFactorConfirmations.userId],
+  }),
 }));
 
 export const accounts = createTable(
@@ -146,5 +153,48 @@ export const passwordResetTokens = createTable(
   },
   (prt) => ({
     compoundKey: primaryKey({ columns: [prt.email, prt.token] }),
+  }),
+);
+
+export const twoFactorTokens = createTable(
+  "two_factor_token",
+  {
+    id: varchar("id", { length: 255 })
+      .notNull()
+      .$defaultFn(() => crypto.randomUUID()),
+    email: varchar("email", { length: 255 }).notNull(),
+    token: varchar("token", { length: 255 }).notNull(),
+    expires: timestamp("expires", {
+      mode: "date",
+      withTimezone: true,
+    }).notNull(),
+  },
+  (tft) => ({
+    compoundKey: primaryKey({ columns: [tft.email, tft.token] }),
+  }),
+);
+
+export const twoFactorConfirmations = createTable(
+  "two_factor_confirmation",
+  {
+    id: varchar("id", { length: 255 })
+      .notNull()
+      .$defaultFn(() => crypto.randomUUID()),
+    userId: varchar("user_id", { length: 255 })
+      .notNull()
+      .references(() => users.id),
+  },
+  (tfc) => ({
+    userIdUnique: unique("two_factor_user_id_unique").on(tfc.userId),
+  }),
+);
+
+export const twoFactorConfirmationsRelations = relations(
+  twoFactorConfirmations,
+  ({ one }) => ({
+    user: one(users, {
+      fields: [twoFactorConfirmations.userId],
+      references: [users.id],
+    }),
   }),
 );

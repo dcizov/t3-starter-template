@@ -1,1 +1,0 @@
-DROP TABLE "t3-starter-template_post";

@@ -48,6 +48,11 @@ export const loginSchema = z.object({
     .min(1, "Password is required")
     .min(8, "Password must be more than 8 characters")
     .max(32, "Password must be less than 32 characters"),
+  code: z
+    .string()
+    .min(6, "2FA code must be at least 6 characters")
+    .max(6, "2FA code must be exactly 6 characters")
+    .optional(),
 });
 
 export const createSessionSchema = z.object({
