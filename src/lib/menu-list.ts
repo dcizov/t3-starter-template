@@ -1,7 +1,5 @@
 import {
   Tag,
-  Users,
-  Settings,
   Bookmark,
   SquarePen,
   LayoutGrid,
@@ -74,25 +72,6 @@ export function getMenuList(pathname: string): Group[] {
           label: "Tags",
           active: pathname.includes("/tags"),
           icon: Tag,
-          submenus: [],
-        },
-      ],
-    },
-    {
-      groupLabel: "Settings",
-      menus: [
-        {
-          href: "/dashboard/settings",
-          label: "Settings",
-          active: pathname.includes("/settings"),
-          icon: Settings,
-          submenus: [],
-        },
-        {
-          href: "/account",
-          label: "Account",
-          active: pathname.includes("/account"),
-          icon: Users,
           submenus: [],
         },
       ],
