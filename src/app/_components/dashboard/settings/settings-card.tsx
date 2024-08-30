@@ -4,18 +4,24 @@ import {
   CardTitle,
   CardDescription,
   CardContent,
+  CardFooter,
 } from "@/app/_components/ui/card";
+import SettingsButton from "@/app/_components/dashboard/settings/settings-button";
 
 type SettingsCardProps = {
   title: string;
   description: string;
   children: React.ReactNode;
+  isLoading: boolean;
+  buttonText: string;
 };
 
 export function SettingsCard({
   title,
   description,
   children,
+  isLoading,
+  buttonText,
 }: SettingsCardProps) {
   return (
     <Card className="rounded-lg border">
@@ -26,6 +32,9 @@ export function SettingsCard({
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4 p-6">{children}</CardContent>
+      <CardFooter className="flex justify-end p-6">
+        <SettingsButton isLoading={isLoading} buttonText={buttonText} />
+      </CardFooter>
     </Card>
   );
 }

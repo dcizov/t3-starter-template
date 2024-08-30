@@ -86,7 +86,7 @@ export const UserNav: React.FC<UserNavProps> = ({ session }) => {
             </Link>
           </DropdownMenuItem>
           <DropdownMenuItem className="hover:cursor-pointer" asChild>
-            <Link href="/settings" className="flex items-center">
+            <Link href="/dashboard/settings" className="flex items-center">
               <Settings className="mr-3 h-4 w-4 text-muted-foreground" />
               Settings
             </Link>

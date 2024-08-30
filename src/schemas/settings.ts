@@ -1,25 +1,40 @@
 import { z } from "zod";
 
-export const settingsSchema = z
+export const updateSettingsSchema = z
   .object({
-    username: z
+    id: z.string().uuid({ message: "Invalid user ID" }),
+    firstName: z
       .string()
-      .min(2, "Username must be at least 2 characters")
-      .max(30, "Username must not exceed 30 characters"),
-    email: z.string().email("Invalid email address"),
-    bio: z.string().max(160, "Bio must not exceed 160 characters").optional(),
-    two_factor: z.boolean().default(false).optional(),
-    two_factor_method: z.enum(["email", "authenticator"]).optional(),
+      .min(2, "First name must have at least 2 characters")
+      .max(12, "First name must be up to 12 characters")
+      .optional(),
+    lastName: z
+      .string()
+      .min(2, "Last name must have at least 2 characters")
+      .max(12, "Last name must be up to 12 characters")
+      .optional(),
+    name: z.string().optional(),
+    email: z.string().email("Please enter a valid email address").optional(),
+    currentPassword: z
+      .string()
+      .min(8, "Current password must have at least 8 characters")
+      .optional(),
+    newPassword: z
+      .string()
+      .min(8, "New password must have at least 8 characters")
+      .max(32, "New password must be up to 32 characters")
+      .regex(
+        new RegExp(
+          "^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[^a-zA-Z0-9]).{8,32}$",
+        ),
+        "New password must contain at least 1 small letter, 1 capital letter, 1 number, and 1 special character",
+      )
+      .optional(),
+    confirmNewPassword: z.string().optional(),
+    bio: z.string().optional(),
+    two_factor: z.boolean().optional(),
   })
-  .refine(
-    (data) => {
-      if (data.two_factor && !data.two_factor_method) {
-        return false;
-      }
-      return true;
-    },
-    {
-      message: "Two-Factor Method is required if 2FA is enabled",
-      path: ["two_factor_method"],
-    },
-  );
+  .refine((data) => data.newPassword === data.confirmNewPassword, {
+    message: "New password and confirm new password do not match",
+    path: ["confirmNewPassword"],
+  });

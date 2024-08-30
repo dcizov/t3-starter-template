@@ -1,6 +1,12 @@
 "use client";
 
-import type { z } from "zod";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+} from "@/app/_components/ui/card";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
@@ -16,36 +22,35 @@ import {
   FormMessage,
   FormDescription,
 } from "@/app/_components/ui/form";
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-  CardContent,
-} from "@/app/_components/ui/card";
-import { Button } from "@/app/_components/ui/button";
-import { Toaster } from "@/app/_components/ui/sonner";
-import { toast } from "sonner";
+import { Toaster, toast } from "sonner";
 import { api } from "@/trpc/react";
-import { settingsSchema } from "@/schemas/settings";
+import { updateSettingsSchema } from "@/schemas/settings";
 import { SettingsCard } from "@/app/_components/dashboard/settings/settings-card";
+import { type Session } from "next-auth";
+import type { z } from "zod";
 
-type InputType = z.infer<typeof settingsSchema>;
+interface SettingsFormProps {
+  session: Session | null;
+}
 
-export default function SettingsForm() {
+type InputType = z.infer<typeof updateSettingsSchema>;
+
+export default function SettingsForm({ session }: SettingsFormProps) {
   const [isLoading, setIsLoading] = useState(false);
+  const user = session?.user;
 
   const form = useForm<InputType>({
     defaultValues: {
-      username: "",
-      email: "",
-      bio: "",
-      two_factor: false,
+      firstName: user?.firstName ?? "",
+      lastName: user?.lastName ?? "",
+      email: user?.email ?? "",
+      bio: user?.bio ?? "",
+      two_factor: user?.isTwoFactorEnabled ?? false,
     },
-    resolver: zodResolver(settingsSchema),
+    resolver: zodResolver(updateSettingsSchema),
   });
 
-  const { mutateAsync } = api.user.update.useMutation({
+  const { mutateAsync } = api.settings.updateSettings.useMutation({
     onSuccess: () => {
       toast.success("Settings Updated", {
         description: "Your settings have been successfully updated.",
@@ -53,28 +58,17 @@ export default function SettingsForm() {
       });
     },
     onError: (error) => {
-      if (error.data?.zodError) {
-        for (const [field, messages] of Object.entries(
-          error.data.zodError.fieldErrors,
-        )) {
-          form.setError(field as keyof InputType, {
-            type: "server",
-            message: messages?.join(", "),
-          });
-        }
-      } else {
-        toast.error("Update failed", {
-          description: error.message || "Something went wrong!",
-          duration: 5000,
-        });
-      }
+      toast.error("Update failed", {
+        description: error.message || "Something went wrong!",
+        duration: 5000,
+      });
     },
   });
 
   const onSubmit = async (data: InputType) => {
     setIsLoading(true);
     try {
-      // await mutateAsync(data);
+      await mutateAsync(data);
     } catch (error) {
       console.error("Settings update failed:", error);
     } finally {
@@ -110,19 +104,31 @@ export default function SettingsForm() {
                 <SettingsCard
                   title="General"
                   description="Update general settings"
+                  isLoading={isLoading}
+                  buttonText="Save Changes"
                 >
                   <FormField
                     control={form.control}
-                    name="username"
+                    name="firstName"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Username</FormLabel>
+                        <FormLabel>First Name</FormLabel>
                         <FormControl>
-                          <Input placeholder="johndoe" {...field} />
+                          <Input {...field} />
                         </FormControl>
-                        <FormDescription>
-                          This is your public display name.
-                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="lastName"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Last Name</FormLabel>
+                        <FormControl>
+                          <Input {...field} />
+                        </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -165,10 +171,60 @@ export default function SettingsForm() {
                   />
                 </SettingsCard>
 
+                {/* Password Settings Card */}
+                <SettingsCard
+                  title="Password"
+                  description="Update your password"
+                  isLoading={isLoading}
+                  buttonText="Save Password"
+                >
+                  <FormField
+                    control={form.control}
+                    name="currentPassword"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Current Password</FormLabel>
+                        <FormControl>
+                          <Input type="password" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="newPassword"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>New Password</FormLabel>
+                        <FormControl>
+                          <Input type="password" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="confirmNewPassword"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Confirm New Password</FormLabel>
+                        <FormControl>
+                          <Input type="password" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </SettingsCard>
+
                 {/* 2FA Settings Card */}
                 <SettingsCard
                   title="Two-Factor Authentication (2FA)"
                   description="Add an extra layer of security to your account"
+                  isLoading={isLoading}
+                  buttonText="Save 2FA Settings"
                 >
                   <FormField
                     control={form.control}
@@ -186,17 +242,6 @@ export default function SettingsForm() {
                     )}
                   />
                 </SettingsCard>
-
-                {/* Submit Button */}
-                <div className="mt-6 flex justify-end">
-                  <Button
-                    type="submit"
-                    disabled={isLoading}
-                    className="w-full sm:w-auto"
-                  >
-                    {isLoading ? "Updating..." : "Update Settings"}
-                  </Button>
-                </div>
               </div>
             </form>
           </Form>

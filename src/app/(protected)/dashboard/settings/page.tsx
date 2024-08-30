@@ -12,7 +12,7 @@ import {
 } from "@/app/_components/ui/breadcrumb";
 import { auth } from "@/server/auth";
 
-export default async function DashboardPage() {
+export default async function SettingsPage() {
   const session = await auth();
 
   return (
@@ -36,7 +36,7 @@ export default async function DashboardPage() {
           </BreadcrumbItem>
         </BreadcrumbList>
       </Breadcrumb>
-      <SettingsForm />
+      <SettingsForm session={session} />
     </ContentLayout>
   );
 }

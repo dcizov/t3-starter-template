@@ -72,6 +72,8 @@ export async function updateUserById(
     password: string;
     role: string;
     emailVerified: Date;
+    bio?: string;
+    two_factor?: boolean;
   }>,
 ) {
   const dbInstance = ctx?.db ?? db;
