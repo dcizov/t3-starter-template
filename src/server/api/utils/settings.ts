@@ -8,15 +8,17 @@ type Context =
 interface UserData {
   firstName?: string;
   lastName?: string;
-  name?: string;
+  name?: string | null;
   email?: string;
   currentPassword?: string;
   newPassword?: string;
   confirmNewPassword?: string;
   role?: string;
-  emailVerified?: Date;
-  bio?: string;
-  two_factor?: boolean;
+  emailVerified?: Date | null;
+  image?: string | null;
+  isTwoFactorEnabled?: boolean;
+  username?: string | null;
+  bio?: string | null;
 }
 
 /**
@@ -28,11 +30,14 @@ interface UserData {
  */
 export async function updateSettings(
   ctx: Context | undefined,
-  id: string,
-  updateData: UserData,
+  id: string | undefined,
+  updateData: Partial<UserData>,
 ) {
-  const user = await findUserById(ctx, id);
+  if (!id) {
+    throw new Error("User ID is required");
+  }
 
+  const user = await findUserById(ctx, id);
   if (!user) {
     throw new Error("User not found");
   }
@@ -40,15 +45,15 @@ export async function updateSettings(
   const { currentPassword, newPassword, confirmNewPassword, ...otherData } =
     updateData;
 
-  const hashedPassword =
-    currentPassword && newPassword && confirmNewPassword
-      ? await handlePasswordUpdate(
-          currentPassword,
-          newPassword,
-          confirmNewPassword,
-          user.password!,
-        )
-      : undefined;
+  let hashedPassword: string | undefined;
+  if (currentPassword && newPassword && confirmNewPassword) {
+    hashedPassword = await handlePasswordUpdate(
+      currentPassword,
+      newPassword,
+      confirmNewPassword,
+      user.password!,
+    );
+  }
 
   const updateUserValues = {
     ...otherData,

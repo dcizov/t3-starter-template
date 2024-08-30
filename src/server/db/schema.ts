@@ -39,6 +39,8 @@ export const users = createTable("user", {
   password: varchar("password", { length: 255 }),
   role: varchar("role", { length: 255 }).notNull(),
   isTwoFactorEnabled: boolean("is_two_factor_enabled").notNull().default(false),
+  username: varchar("username", { length: 255 }).default(sql`NULL`),
+  bio: text("bio").default(sql`NULL`),
 });
 
 export const usersRelations = relations(users, ({ many, one }) => ({

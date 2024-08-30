@@ -1,5 +1,9 @@
 import { z } from "zod";
 
+const passwordRegex = new RegExp(
+  "^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[^a-zA-Z0-9]).{8,32}$",
+);
+
 export const updateSettingsSchema = z
   .object({
     id: z.string().uuid({ message: "Invalid user ID" }),
@@ -24,17 +28,36 @@ export const updateSettingsSchema = z
       .min(8, "New password must have at least 8 characters")
       .max(32, "New password must be up to 32 characters")
       .regex(
-        new RegExp(
-          "^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[^a-zA-Z0-9]).{8,32}$",
-        ),
+        passwordRegex,
         "New password must contain at least 1 small letter, 1 capital letter, 1 number, and 1 special character",
       )
       .optional(),
     confirmNewPassword: z.string().optional(),
     bio: z.string().optional(),
-    two_factor: z.boolean().optional(),
+    isTwoFactorEnabled: z.boolean().optional(),
   })
-  .refine((data) => data.newPassword === data.confirmNewPassword, {
-    message: "New password and confirm new password do not match",
-    path: ["confirmNewPassword"],
-  });
+  .partial()
+  .refine(
+    (data) => {
+      if (data.newPassword ?? data.confirmNewPassword) {
+        return data.newPassword === data.confirmNewPassword;
+      }
+      return true;
+    },
+    {
+      message: "New password and confirm new password do not match",
+      path: ["confirmNewPassword"],
+    },
+  )
+  .refine(
+    (data) => {
+      if (data.newPassword) {
+        return !!data.currentPassword;
+      }
+      return true;
+    },
+    {
+      message: "Current password is required when setting a new password",
+      path: ["currentPassword"],
+    },
+  );

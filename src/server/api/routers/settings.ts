@@ -7,29 +7,17 @@ export const settingsRouter = createTRPCRouter({
   updateSettings: publicProcedure
     .input(updateSettingsSchema)
     .mutation(async ({ ctx, input }) => {
-      const {
-        id,
-        firstName,
-        lastName,
-        email,
-        currentPassword,
-        newPassword,
-        confirmNewPassword,
-        bio,
-        two_factor,
-      } = input;
+      const { id, ...updateData } = input;
+
+      if (!id) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "User ID is required",
+        });
+      }
 
       try {
-        const updatedUserSettings = await updateSettings(ctx, id, {
-          firstName,
-          lastName,
-          email,
-          currentPassword,
-          newPassword,
-          confirmNewPassword,
-          bio,
-          two_factor,
-        });
+        const updatedUserSettings = await updateSettings(ctx, id, updateData);
 
         return {
           success: true,
@@ -37,6 +25,12 @@ export const settingsRouter = createTRPCRouter({
           user: updatedUserSettings,
         };
       } catch (error) {
+        if (error instanceof Error) {
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: error.message || "Failed to update user",
+          });
+        }
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Failed to update user",

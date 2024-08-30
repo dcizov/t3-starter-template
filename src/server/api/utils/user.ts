@@ -65,15 +65,17 @@ export async function updateUserById(
   ctx: Context | undefined,
   id: string,
   updateData: Partial<{
+    name: string | null;
     firstName: string;
     lastName: string;
-    name: string;
     email: string;
-    password: string;
+    emailVerified: Date | null;
+    image: string | null;
+    password: string | null;
     role: string;
-    emailVerified: Date;
-    bio?: string;
-    two_factor?: boolean;
+    isTwoFactorEnabled: boolean;
+    username: string | null;
+    bio: string | null;
   }>,
 ) {
   const dbInstance = ctx?.db ?? db;

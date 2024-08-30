@@ -14,6 +14,7 @@ type SettingsCardProps = {
   children: React.ReactNode;
   isLoading: boolean;
   buttonText: string;
+  onSubmit: () => void;
 };
 
 export function SettingsCard({
@@ -22,6 +23,7 @@ export function SettingsCard({
   children,
   isLoading,
   buttonText,
+  onSubmit,
 }: SettingsCardProps) {
   return (
     <Card className="rounded-lg border">
@@ -33,7 +35,11 @@ export function SettingsCard({
       </CardHeader>
       <CardContent className="space-y-4 p-6">{children}</CardContent>
       <CardFooter className="flex justify-end p-6">
-        <SettingsButton isLoading={isLoading} buttonText={buttonText} />
+        <SettingsButton
+          isLoading={isLoading}
+          buttonText={buttonText}
+          onClick={onSubmit}
+        />
       </CardFooter>
     </Card>
   );
