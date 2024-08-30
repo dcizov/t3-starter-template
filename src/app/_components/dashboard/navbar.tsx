@@ -1,6 +1,6 @@
-import { ModeToggle } from "../common/mode-toggle";
+import { ModeToggle } from "@/app/_components/common/mode-toggle";
 import { UserNav } from "@/app/_components/common/user-nav";
-import { SheetMenu } from "./sheet-menu";
+import { SheetMenu } from "@/app/_components/dashboard/sheet-menu";
 import type { Session } from "next-auth";
 
 interface NavbarProps {

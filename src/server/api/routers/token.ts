@@ -1,19 +1,17 @@
 import { createTRPCRouter, publicProcedure } from "@/server/api/trpc";
 import { TRPCError } from "@trpc/server";
 import {
-  generateVerificationToken,
-  getVerificationTokenById,
-  getVerificationTokenByEmail,
-  getVerificationTokenByToken,
-  deleteVerificationToken,
-} from "@/server/api/utils/auth/verification-token";
-import {
   generatePasswordResetToken,
   getPasswordResetTokenById,
   getPasswordResetTokenByEmail,
   getPasswordResetTokenByToken,
   deletePasswordResetToken,
-} from "@/server/api/utils/auth/password-reset-token";
+  generateVerificationToken,
+  getVerificationTokenById,
+  getVerificationTokenByEmail,
+  getVerificationTokenByToken,
+  deleteVerificationToken,
+} from "@/server/api/utils/auth";
 import {
   tokenByEmailSchema,
   tokenByIdSchema,

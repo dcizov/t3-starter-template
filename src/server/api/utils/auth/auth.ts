@@ -2,20 +2,18 @@ import { hash, compare } from "bcrypt";
 import { accounts, users } from "@/server/db/schema";
 import { getUserRole } from "@/lib/utils";
 import {
+  generatePasswordResetToken,
+  getPasswordResetTokenByToken,
+  deletePasswordResetToken,
   generateVerificationToken,
   getVerificationTokenByToken,
   deleteVerificationToken,
-} from "@/server/api/utils/auth/verification-token";
+} from "@/server/api/utils/auth";
 import { sendPasswordResetEmail, sendVerificationEmail } from "@/lib/mail";
 import { type createTRPCContext } from "@/server/api/trpc";
 import { findUserByEmail, updateUserById } from "@/server/api/utils/user";
 import { db } from "@/server/db";
 import { eq } from "drizzle-orm";
-import {
-  generatePasswordResetToken,
-  getPasswordResetTokenByToken,
-  deletePasswordResetToken,
-} from "@/server/api/utils/auth/password-reset-token";
 
 type Context =
   ReturnType<typeof createTRPCContext> extends Promise<infer T> ? T : never;

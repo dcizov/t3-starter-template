@@ -1,6 +1,6 @@
 import { hash, compare } from "bcrypt";
 import { type createTRPCContext } from "@/server/api/trpc";
-import { findUserById, updateUserById } from "@/server/api/utils/user";
+import { findUserById, updateUserById } from "@/server/api/utils/user/user";
 
 type Context =
   ReturnType<typeof createTRPCContext> extends Promise<infer T> ? T : never;

@@ -1,8 +1,8 @@
-import { authRouter } from "./routers/auth";
-import { userRouter } from "./routers/user";
-import { tokenRouter } from "./routers/token";
-import { sessionRouter } from "./routers/session";
-import { settingsRouter } from "./routers/settings";
+import { authRouter } from "@/server/api/routers/auth";
+import { userRouter } from "@/server/api/routers/user";
+import { tokenRouter } from "@/server/api/routers/token";
+import { sessionRouter } from "@/server/api/routers/session";
+import { settingsRouter } from "@/server/api/routers/settings";
 import { createCallerFactory, createTRPCRouter } from "@/server/api/trpc";
 
 /**

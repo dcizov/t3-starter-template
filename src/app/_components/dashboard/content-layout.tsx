@@ -1,4 +1,4 @@
-import { Navbar } from "./navbar";
+import { Navbar } from "@/app/_components/dashboard/navbar";
 import type { Session } from "next-auth";
 
 interface ContentLayoutProps {

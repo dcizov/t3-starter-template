@@ -16,7 +16,7 @@ import {
   updateUserById,
   deleteUserById,
 } from "@/server/api/utils/user";
-import { registerUser } from "@/server/api/utils/auth/auth";
+import { registerUser } from "@/server/api/utils/auth";
 
 export const userRouter = createTRPCRouter({
   getByEmail: publicProcedure

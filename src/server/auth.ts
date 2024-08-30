@@ -11,12 +11,12 @@ import {
 import { cookies } from "next/headers";
 import { encode, decode } from "next-auth/jwt";
 import { updateUserById, findUserById } from "@/server/api/utils/user";
-import { createSession } from "@/server/api/utils/session/session";
+import { createSession } from "@/server/api/utils/session";
 import authConfig from "@/server/auth.config";
 import {
   deleteTwoFactorConfirmation,
   getTwoFactorConfirmationByUserId,
-} from "@/server/api/utils/2fa/2fa-confirmation";
+} from "@/server/api/utils/2fa";
 
 /**
  * Module augmentation for `next-auth` types. Allows us to add custom properties to the `session`

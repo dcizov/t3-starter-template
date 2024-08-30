@@ -13,8 +13,8 @@ import {
   verifyEmailToken,
   resetPassword,
   setNewPassword,
-} from "@/server/api/utils/auth/auth";
-import { handleTwoFactorAuthentication } from "../utils/2fa/2fa";
+} from "@/server/api/utils/auth";
+import { handleTwoFactorAuthentication } from "@/server/api/utils/2fa";
 
 const verifyEmailSchema = z.object({
   token: z.string().nonempty("Token is required"),

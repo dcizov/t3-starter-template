@@ -2,8 +2,8 @@
 
 import { cn } from "@/lib/utils";
 import { useStore } from "@/hooks/use-store";
-import { Footer } from "./footer";
-import { Sidebar } from "./sidebar";
+import { Footer } from "@/app/_components/dashboard/footer";
+import { Sidebar } from "@/app/_components/dashboard/sidebar";
 import { useSidebarToggle } from "@/hooks/use-sidebar-toggle";
 
 export default function AdminPanelLayout({

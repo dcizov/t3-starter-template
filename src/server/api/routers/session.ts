@@ -1,10 +1,7 @@
 import { createTRPCRouter, publicProcedure } from "@/server/api/trpc";
 import { TRPCError } from "@trpc/server";
 import { createSessionSchema, deleteSessionSchema } from "@/schemas/session";
-import {
-  createSession,
-  deleteSession,
-} from "@/server/api/utils/session/session";
+import { createSession, deleteSession } from "@/server/api/utils/session";
 
 export const sessionRouter = createTRPCRouter({
   createSession: publicProcedure

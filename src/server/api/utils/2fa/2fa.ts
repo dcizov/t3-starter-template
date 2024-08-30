@@ -2,14 +2,12 @@ import {
   deleteTwoFactorToken,
   generateTwoFactorToken,
   getTwoFactorTokenByEmail,
-} from "@/server/api/utils/2fa/2fa-token";
-import { sendTwoFactorEmail } from "@/lib/mail";
-import { type createTRPCContext } from "@/server/api/trpc";
-import {
   deleteTwoFactorConfirmation,
   generateTwoFactorConfirmation,
   getTwoFactorConfirmationByUserId,
-} from "./2fa-confirmation";
+} from "@/server/api/utils/2fa";
+import { sendTwoFactorEmail } from "@/lib/mail";
+import { type createTRPCContext } from "@/server/api/trpc";
 
 type Context =
   ReturnType<typeof createTRPCContext> extends Promise<infer T> ? T : never;

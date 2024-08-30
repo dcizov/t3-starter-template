@@ -2,7 +2,7 @@
 
 import { signOut as nextAuthSignOut } from "@/server/auth";
 import { cookies } from "next/headers";
-import { deleteSession } from "@/server/api/utils/session/session";
+import { deleteSession } from "@/server/api/utils/session";
 
 export const signOut = async () => {
   const cookieStore = cookies();
