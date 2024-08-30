@@ -20,8 +20,8 @@ import {
   FormMessage,
 } from "@/app/_components/ui/form";
 import { signIn } from "next-auth/react";
-import AuthButton from "@/app/_components/auth/auth-button";
-import SocialAuthButton from "@/app/_components/auth/social-auth-button";
+import AuthButton from "@/app/_components/auth/buttons/auth-button";
+import SocialAuthButton from "@/app/_components/auth/buttons/social-auth-button";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { api } from "@/trpc/react";

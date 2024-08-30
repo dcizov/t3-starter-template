@@ -23,7 +23,7 @@ import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { api } from "@/trpc/react";
 import { resetPasswordSchema } from "@/schemas/auth";
-import AuthButton from "@/app/_components/auth/auth-button";
+import AuthButton from "@/app/_components/auth/buttons/auth-button";
 
 type InputType = z.infer<typeof resetPasswordSchema>;
 

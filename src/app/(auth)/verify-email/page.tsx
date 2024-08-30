@@ -1,6 +1,6 @@
 import Image from "next/image";
 import { Card, CardContent } from "@/app/_components/ui/card";
-import VerifyEmailForm from "@/app/_components/auth/verify-email-form";
+import VerifyEmailForm from "@/app/_components/auth/forms/verify-email-form";
 
 export default function VerifyEmailPage() {
   return (

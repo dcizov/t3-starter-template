@@ -1,6 +1,6 @@
 import Image from "next/image";
 import { Card, CardContent } from "@/app/_components/ui/card";
-import ResetPasswordForm from "@/app/_components/auth/reset-password-form";
+import ResetPasswordForm from "@/app/_components/auth/forms/reset-password-form";
 
 export default function SignInPage() {
   return (

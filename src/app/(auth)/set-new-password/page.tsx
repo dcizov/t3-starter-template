@@ -1,6 +1,6 @@
 import Image from "next/image";
 import { Card, CardContent } from "@/app/_components/ui/card";
-import SetPasswordForm from "@/app/_components/auth/set-password-form";
+import SetPasswordForm from "@/app/_components/auth/forms/set-password-form";
 
 export default function SignInPage() {
   return (

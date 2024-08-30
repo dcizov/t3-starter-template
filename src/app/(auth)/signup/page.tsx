@@ -1,6 +1,6 @@
 import Image from "next/image";
 import { Card, CardContent } from "@/app/_components/ui/card";
-import SignUpForm from "@/app/_components/auth/signup-form";
+import SignUpForm from "@/app/_components/auth/forms/signup-form";
 
 export default function SignUpPage() {
   return (

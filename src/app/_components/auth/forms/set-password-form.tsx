@@ -22,7 +22,7 @@ import { toast } from "sonner";
 import { useRouter, useSearchParams } from "next/navigation";
 import { api } from "@/trpc/react";
 import { setNewPasswordSchema } from "@/schemas/auth";
-import AuthButton from "@/app/_components/auth/auth-button";
+import AuthButton from "@/app/_components/auth/buttons/auth-button";
 
 type InputType = z.infer<typeof setNewPasswordSchema>;
 
