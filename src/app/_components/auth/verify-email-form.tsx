@@ -7,7 +7,6 @@ import {
   CardDescription,
 } from "@/app/_components/ui/card";
 import { LoaderCircle } from "lucide-react";
-import { Toaster } from "@/app/_components/ui/sonner";
 import { toast } from "sonner";
 import { api } from "@/trpc/react";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -94,17 +93,6 @@ export default function VerifyEmailForm() {
   // TODO: add resend email logic after token expired
   return (
     <>
-      <Toaster
-        position="bottom-right"
-        toastOptions={{
-          classNames: {
-            error: "bg-red-400",
-            success: "bg-green-400",
-            warning: "bg-yellow-400",
-            info: "bg-blue-400",
-          },
-        }}
-      />
       <div className="w-full max-w-[350px] space-y-6 text-center">
         <CardHeader className="space-y-1">
           <CardTitle className="text-2xl font-bold sm:text-3xl">

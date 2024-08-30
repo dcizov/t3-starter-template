@@ -5,6 +5,7 @@ import { type Metadata } from "next";
 
 import { TRPCReactProvider } from "@/trpc/react";
 import { ThemeProvider } from "@/providers/theme-provider";
+import { Toaster } from "@/app/_components/ui/sonner";
 
 export const metadata: Metadata = {
   title: "Create T3 App",
@@ -21,6 +22,17 @@ export default function RootLayout({
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <TRPCReactProvider>{children}</TRPCReactProvider>
         </ThemeProvider>
+        <Toaster
+          position="bottom-right"
+          toastOptions={{
+            classNames: {
+              error: "bg-red-400",
+              success: "bg-green-400",
+              warning: "bg-yellow-400",
+              info: "bg-blue-400",
+            },
+          }}
+        />
       </body>
     </html>
   );

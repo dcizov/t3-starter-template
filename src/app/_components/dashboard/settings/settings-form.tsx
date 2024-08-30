@@ -22,7 +22,6 @@ import {
   FormMessage,
   FormDescription,
 } from "@/app/_components/ui/form";
-import { Toaster } from "@/app/_components/ui/sonner";
 import { toast } from "sonner";
 import { api } from "@/trpc/react";
 import { updateSettingsSchema } from "@/schemas/settings";
@@ -93,17 +92,6 @@ export default function SettingsForm({ session }: SettingsFormProps) {
 
   return (
     <>
-      <Toaster
-        position="bottom-right"
-        toastOptions={{
-          classNames: {
-            error: "bg-red-400",
-            success: "bg-green-400",
-            warning: "bg-yellow-400",
-            info: "bg-blue-400",
-          },
-        }}
-      />
       <Card className="mt-6 rounded-lg border-none">
         <CardHeader className="space-y-1 p-6">
           <CardTitle className="text-2xl font-bold">Settings</CardTitle>

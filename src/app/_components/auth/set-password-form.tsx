@@ -18,7 +18,6 @@ import {
   FormLabel,
   FormMessage,
 } from "@/app/_components/ui/form";
-import { Toaster } from "@/app/_components/ui/sonner";
 import { toast } from "sonner";
 import { useRouter, useSearchParams } from "next/navigation";
 import { api } from "@/trpc/react";
@@ -91,17 +90,6 @@ export default function SetNewPasswordForm() {
 
   return (
     <>
-      <Toaster
-        position="bottom-right"
-        toastOptions={{
-          classNames: {
-            error: "bg-red-400",
-            success: "bg-green-400",
-            warning: "bg-yellow-400",
-            info: "bg-blue-400",
-          },
-        }}
-      />
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)}>
           <div className="w-full max-w-[350px] space-y-6">
