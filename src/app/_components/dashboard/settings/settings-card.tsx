@@ -1,3 +1,4 @@
+import React from "react";
 import {
   Card,
   CardHeader,
@@ -13,8 +14,9 @@ type SettingsCardProps = {
   description: string;
   children: React.ReactNode;
   isLoading: boolean;
-  buttonText: string;
+  isCardDirty: boolean;
   onSubmit: () => void;
+  onCancel: () => void;
 };
 
 export function SettingsCard({
@@ -22,8 +24,9 @@ export function SettingsCard({
   description,
   children,
   isLoading,
-  buttonText,
+  isCardDirty,
   onSubmit,
+  onCancel,
 }: SettingsCardProps) {
   return (
     <Card className="rounded-lg border">
@@ -34,10 +37,17 @@ export function SettingsCard({
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4 p-6">{children}</CardContent>
-      <CardFooter className="flex justify-end p-6">
+      <CardFooter className="flex justify-end space-x-4 p-6">
         <SettingsButton
           isLoading={isLoading}
-          buttonText={buttonText}
+          isFormDirty={isCardDirty}
+          buttonType="cancel"
+          onClick={onCancel}
+        />
+        <SettingsButton
+          isLoading={isLoading}
+          isFormDirty={isCardDirty}
+          buttonType="save"
           onClick={onSubmit}
         />
       </CardFooter>
